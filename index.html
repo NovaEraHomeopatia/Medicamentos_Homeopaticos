@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Consulta de Medicamentos | Nova Era</title>
+
+  <!-- DataTables + jQuery (CDN) -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+
+  <!-- PapaParse para ler CSV -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      line-height: 1.4;
+    }
+    h1 { margin-bottom: 6px; }
+    .topo { margin-bottom: 12px; color: #444; }
+    .loading { margin: 12px 0; }
+    .erro { color: #b00020; font-weight: bold; margin: 12px 0; }
+    .dica {
+      margin: 10px 0 16px;
+      padding: 10px;
+      background: #f6f7f9;
+      border: 1px solid #e3e6ea;
+      border-radius: 8px;
+      color: #333;
+    }
+    table.dataTable thead th { white-space: nowrap; }
+    .rodape {
+      margin-top: 14px;
+      font-size: 12px;
+      color: #666;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Consulta de Medicamentos</h1>
+  <div class="topo">Busque por <b>código</b>, <b>medicamento</b>, <b>escala</b> (CH, DH, K, LM, FC...) ou por uma <b>potência</b> (ex.: 29, 200, 1/10).</div>
+
+  <div class="dica">
+    <b>Dicas rápidas:</b>
+    <ul style="margin: 8px 0 0 18px;">
+      <li>Use a busca para encontrar “<b>ABAJERU</b>”, “<b>FC/CH</b>” ou “<b>200</b>”.</li>
+      <li>Você pode ordenar clicando no título das colunas.</li>
+      <li>Para ver mais resultados de uma vez, use “Mostrar” e selecione <b>100</b>.</li>
+    </ul>
+  </div>
+
+  <div id="status" class="loading">Carregando dados...</div>
+
+  <table id="tabela" class="display" style="width:100%">
+    <thead></thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="rodape">
+    Caso você atualize o arquivo <b>dados.csv</b>, a página passa a mostrar automaticamente a nova versão.
+  </div>
+
+  <script>
+    // Nome do CSV (deve estar na mesma pasta do index.html no GitHub)
+    const ARQUIVO_CSV = "dados.csv";
+
+    // Seu CSV usa ponto e vírgula (confirmado no Bloco de Notas)
+    const DELIMITADOR = ";";
+
+    // Títulos fixos (se o CSV já tem cabeçalho, vamos preferir o do CSV;
+    // mas se por algum motivo o cabeçalho vier vazio, usamos estes)
+    const CABECALHO_PADRAO = ["Código", "Medicamento", "Escala", "Potências disponíveis"];
+
+    // Normaliza a coluna de potências para melhorar a busca:
+    // - troca múltiplos espaços por 1
+    // - garante espaços em volta de "/" e também mantém tokens
+    function normalizarPotencias(txt) {
+      const s = (txt ?? "").toString();
+      // Colapsa espaços
+      let out = s.replace(/\s+/g, " ").trim();
+      // Mantém "1/10" como token, mas também facilita buscar "1/10" e "10"
+      // (DataTables já busca por substring, então só garantir limpeza ajuda bastante)
+      return out;
+    }
+
+    function montarTabela(cabecalho, linhas) {
+      const thead = document.querySelector("#tabela thead");
+      const trHead = document.createElement("tr");
+
+      cabecalho.forEach(col => {
+        const th = document.createElement("th");
+        th.textContent = col || "";
+        trHead.appendChild(th);
+      });
+      thead.appendChild(trHead);
+
+      const tbody = document.querySelector("#tabela tbody");
+
+      linhas.forEach(linha => {
+        // ignora linhas completamente vazias
+        const temConteudo = linha.some(c => String(c ?? "").trim() !== "");
+        if (!temConteudo) return;
+
+        const tr = document.createElement("tr");
+
+        // Garante 4 colunas (se vier menos, preenche com vazio)
+        const c0 = (linha[0] ?? "").toString();
+        const c1 = (linha[1] ?? "").toString();
+        const c2 = (linha[2] ?? "").toString();
+        const c3 = normalizarPotencias(linha[3] ?? "");
+
+        [c0, c1, c2, c3].forEach(val => {
+          const td = document.createElement("td");
+          td.textContent = val;
+          tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+      });
+
+      // DataTables
+      $('#tabela').DataTable({
+        pageLength: 100,                // já começa em 100 por página
+        lengthMenu: [10, 25, 50, 100],  // opções do seletor
+        order: [],                      // sem ordenação inicial
+        search: { smart: true },        // busca "esperta"
+        language: {
+          decimal: ",",
+          thousands: ".",
+          processing: "Processando...",
+          search: "Buscar:",
+          lengthMenu: "Mostrar _MENU_ registros",
+          info: "Mostrando de _START_ até _END_ de _TOTAL_ registros",
+          infoEmpty: "Mostrando 0 até 0 de 0 registros",
+          infoFiltered: "(filtrado de _MAX_ registros no total)",
+          loadingRecords: "Carregando...",
+          zeroRecords: "Nenhum registro encontrado",
+          emptyTable: "Nenhum dado disponível na tabela",
+          paginate: {
+            first: "Primeiro",
+            previous: "Anterior",
+            next: "Próximo",
+            last: "Último"
+          },
+          aria: {
+            sortAscending: ": ativar para ordenar a coluna em ordem crescente",
+            sortDescending: ": ativar para ordenar a coluna em ordem decrescente"
+          }
+        }
+      });
+
+      document.getElementById("status").textContent = "";
+    }
+
+    function carregarCSV() {
+      Papa.parse(ARQUIVO_CSV, {
+        download: true,
+        header: false,
+        skipEmptyLines: false,
+        delimiter: DELIMITADOR, // FIXO: ";"
+        complete: function(results) {
+          if (!results || !results.data || results.data.length === 0) {
+            document.getElementById("status").innerHTML =
+              '<div class="erro">Não foi possível ler o CSV. Verifique se o arquivo <b>dados.csv</b> está na mesma pasta do <b>index.html</b>.</div>';
+            return;
+          }
+
+          // Primeira linha como cabeçalho
+          let cabecalho = results.data[0] || [];
+          let linhas = results.data.slice(1);
+
+          // Se o cabeçalho veio estranho/vazio, usa o padrão
+          const cabecalhoValido = cabecalho.length >= 4 && cabecalho.some(x => String(x ?? "").trim() !== "");
+          if (!cabecalhoValido) {
+            cabecalho = CABECALHO_PADRAO;
+            linhas = results.data; // se não tem cabeçalho real, usa tudo como linha
+          }
+
+          // Garante 4 colunas no cabeçalho
+          cabecalho = [
+            (cabecalho[0] ?? CABECALHO_PADRAO[0]).toString(),
+            (cabecalho[1] ?? CABECALHO_PADRAO[1]).toString(),
+            (cabecalho[2] ?? CABECALHO_PADRAO[2]).toString(),
+            (cabecalho[3] ?? CABECALHO_PADRAO[3]).toString()
+          ];
+
+          montarTabela(cabecalho, linhas);
+        },
+        error: function(err) {
+          document.getElementById("status").innerHTML =
+            '<div class="erro">Erro ao carregar o CSV: ' + (err?.message || err) + '</div>';
+        }
+      });
+    }
+
+    carregarCSV();
+  </script>
+</body>
+</html>
