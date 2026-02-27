@@ -37,7 +37,7 @@
   <h1>Consulta de Medicamentos</h1>
 
   <div class="topo">
-    Para consultar, digite o nome do <b>medicamento</b> na busca abaixo (ex.: <b>Arnica</b>, <b>Belladonna</b>, <b>Ignatia</b>).
+    Para consultar, digite o nome do medicamento no campo <b>Buscar medicamento</b> abaixo à direita.
   </div>
 
   <!-- Data de atualização -->
@@ -79,7 +79,6 @@
     }
 
     function formatarDataNumericaBR(d) {
-      // dd/mm/aaaa (sem hora)
       const dd = String(d.getDate()).padStart(2, "0");
       const mm = String(d.getMonth() + 1).padStart(2, "0");
       const yyyy = d.getFullYear();
