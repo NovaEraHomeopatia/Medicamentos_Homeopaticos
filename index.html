@@ -14,33 +14,22 @@
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      line-height: 1.4;
-    }
+    body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.4; }
     h1 { margin-bottom: 6px; }
     .topo { margin-bottom: 10px; color: #444; }
+
+    .meta { margin: 6px 0 14px; font-size: 13px; color: #555; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .pill { background: #f6f7f9; border: 1px solid #e3e6ea; padding: 6px 10px; border-radius: 999px; }
+
     .loading { margin: 12px 0; }
     .erro { color: #b00020; font-weight: bold; margin: 12px 0; }
-    .dica {
-      margin: 10px 0 16px;
-      padding: 10px;
-      background: #f6f7f9;
-      border: 1px solid #e3e6ea;
-      border-radius: 8px;
-      color: #333;
-    }
-    table.dataTable thead th { white-space: nowrap; }
 
-    /* Opcional: deixa a 1ª coluna (Medicamento) um pouco mais “forte” visualmente */
+    .dica { margin: 10px 0 16px; padding: 10px; background: #f6f7f9; border: 1px solid #e3e6ea; border-radius: 8px; color: #333; }
+
+    table.dataTable thead th { white-space: nowrap; }
     #tabela td.col-medicamento { font-weight: 600; }
 
-    .rodape {
-      margin-top: 14px;
-      font-size: 12px;
-      color: #666;
-    }
+    .rodape { margin-top: 14px; font-size: 12px; color: #666; }
   </style>
 </head>
 
@@ -51,12 +40,16 @@
     Para consultar, digite o nome do <b>medicamento</b> na busca abaixo (ex.: <b>Arnica</b>, <b>Belladonna</b>, <b>Ignatia</b>).
   </div>
 
+  <!-- Data de atualização -->
+  <div class="meta">
+    <div class="pill"><b>Catálogo atualizado em</b> <span id="dataAtualizacao">carregando…</span></div>
+  </div>
+
   <div class="dica">
     <b>Dicas rápidas:</b>
     <ul style="margin: 8px 0 0 18px;">
       <li>Você pode digitar só parte do nome (ex.: <b>arnica</b>).</li>
       <li>Para ver mais resultados de uma vez, use “Mostrar” e selecione <b>100</b>.</li>
-      <li>As colunas <b>Escala</b> e <b>Potências disponíveis</b> são apenas informativas.</li>
     </ul>
   </div>
 
@@ -72,23 +65,58 @@
   </div>
 
   <script>
-    // Nome do CSV (deve estar na mesma pasta do index.html no GitHub)
     const ARQUIVO_CSV = "dados.csv";
-
-    // Seu CSV usa ponto e vírgula (confirmado no Bloco de Notas)
     const DELIMITADOR = ";";
-
-    // Cabeçalho padrão (3 colunas)
     const CABECALHO_PADRAO = ["Medicamento", "Escala", "Potências disponíveis"];
 
-    // Normaliza a coluna de potências para ficar mais “limpa”
+    // Ajustado para o seu caso:
+    const GITHUB_USER = "NovaEraHomeopatia";
+    const GITHUB_REPO = "Medicamentos_Homeopaticos";
+
     function normalizarPotencias(txt) {
       const s = (txt ?? "").toString();
       return s.replace(/\s+/g, " ").trim();
     }
 
+    function formatarDataNumericaBR(d) {
+      // dd/mm/aaaa (sem hora)
+      const dd = String(d.getDate()).padStart(2, "0");
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const yyyy = d.getFullYear();
+      return `${dd}/${mm}/${yyyy}`;
+    }
+
+    async function atualizarDataDoCatalogo() {
+      const el = document.getElementById("dataAtualizacao");
+      if (!el) return;
+
+      // Plano A: Last-Modified via HEAD em dados.csv
+      try {
+        const resp = await fetch(ARQUIVO_CSV, { method: "HEAD", cache: "no-store" });
+        const lm = resp.headers.get("Last-Modified");
+        if (lm) {
+          el.textContent = formatarDataNumericaBR(new Date(lm));
+          return;
+        }
+      } catch (e) {}
+
+      // Plano B: último commit do dados.csv via API do GitHub
+      try {
+        const api = `https://api.github.com/repos/${encodeURIComponent(GITHUB_USER)}/${encodeURIComponent(GITHUB_REPO)}/commits?path=${encodeURIComponent(ARQUIVO_CSV)}&per_page=1`;
+        const resp = await fetch(api, { cache: "no-store" });
+        if (!resp.ok) throw new Error("Falha na API do GitHub");
+        const data = await resp.json();
+        const iso = data?.[0]?.commit?.committer?.date || data?.[0]?.commit?.author?.date;
+        if (iso) {
+          el.textContent = formatarDataNumericaBR(new Date(iso));
+          return;
+        }
+      } catch (e) {}
+
+      el.textContent = "indisponível";
+    }
+
     function montarTabela(cabecalho, linhas) {
-      // Cabeçalho
       const thead = document.querySelector("#tabela thead");
       const trHead = document.createElement("tr");
       cabecalho.forEach(col => {
@@ -98,33 +126,27 @@
       });
       thead.appendChild(trHead);
 
-      // Corpo
       const tbody = document.querySelector("#tabela tbody");
 
       linhas.forEach(linha => {
-        // ignora linhas completamente vazias
         const temConteudo = linha.some(c => String(c ?? "").trim() !== "");
         if (!temConteudo) return;
 
         const tr = document.createElement("tr");
 
-        // 3 colunas: Medicamento | Escala | Potências
         const medicamento = (linha[0] ?? "").toString();
         const escala = (linha[1] ?? "").toString();
         const potencias = normalizarPotencias(linha[2] ?? "");
 
-        // Medicamento (com classe para destacar)
         const td0 = document.createElement("td");
         td0.textContent = medicamento;
         td0.className = "col-medicamento";
         tr.appendChild(td0);
 
-        // Escala
         const td1 = document.createElement("td");
         td1.textContent = escala;
         tr.appendChild(td1);
 
-        // Potências
         const td2 = document.createElement("td");
         td2.textContent = potencias;
         tr.appendChild(td2);
@@ -132,15 +154,11 @@
         tbody.appendChild(tr);
       });
 
-      // DataTables
       const dt = $('#tabela').DataTable({
         pageLength: 100,
         lengthMenu: [10, 25, 50, 100],
         order: [],
         language: {
-          decimal: ",",
-          thousands: ".",
-          processing: "Processando...",
           search: "Buscar medicamento:",
           lengthMenu: "Mostrar _MENU_ registros",
           info: "Mostrando de _START_ até _END_ de _TOTAL_ registros",
@@ -149,28 +167,17 @@
           loadingRecords: "Carregando...",
           zeroRecords: "Nenhum medicamento encontrado",
           emptyTable: "Nenhum dado disponível na tabela",
-          paginate: {
-            first: "Primeiro",
-            previous: "Anterior",
-            next: "Próximo",
-            last: "Último"
-          },
-          aria: {
-            sortAscending: ": ativar para ordenar a coluna em ordem crescente",
-            sortDescending: ": ativar para ordenar a coluna em ordem decrescente"
-          }
+          paginate: { first: "Primeiro", previous: "Anterior", next: "Próximo", last: "Último" }
         }
       });
 
-      // Ajuste: quando alguém digitar, forçamos a busca priorizando a 1ª coluna (Medicamento),
-      // para ficar coerente com a intenção do usuário.
-      // (A busca geral do DataTables continua existindo, mas aqui “focamos” no medicamento.)
+      // Busca só na coluna Medicamento
       const $input = $('div.dataTables_filter input');
-      $input.off('keyup.DT input.DT'); // remove handler padrão
+      $input.off('keyup.DT input.DT');
       $input.on('input', function () {
         const q = this.value || "";
-        dt.columns().search("");         // limpa buscas por coluna (se houver)
-        dt.column(0).search(q).draw();   // busca só no Medicamento
+        dt.columns().search("");
+        dt.column(0).search(q).draw();
       });
 
       document.getElementById("status").textContent = "";
@@ -189,18 +196,15 @@
             return;
           }
 
-          // 1ª linha como cabeçalho
           let cabecalho = results.data[0] || [];
           let linhas = results.data.slice(1);
 
-          // Se o cabeçalho veio vazio/estranho, usa padrão e trata tudo como linha
           const cabecalhoValido = cabecalho.length >= 3 && cabecalho.some(x => String(x ?? "").trim() !== "");
           if (!cabecalhoValido) {
             cabecalho = CABECALHO_PADRAO;
             linhas = results.data;
           }
 
-          // Garante 3 colunas no cabeçalho
           cabecalho = [
             (cabecalho[0] ?? CABECALHO_PADRAO[0]).toString(),
             (cabecalho[1] ?? CABECALHO_PADRAO[1]).toString(),
@@ -216,6 +220,8 @@
       });
     }
 
+    // Start
+    atualizarDataDoCatalogo();
     carregarCSV();
   </script>
 </body>
