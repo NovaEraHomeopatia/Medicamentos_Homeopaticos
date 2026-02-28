@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Consulta de Medicamentos | Nova Era</title>
+  <title>Catálogo de Medicamentos Homeopáticos - Nova Era</title>
 
   <!-- DataTables + jQuery (CDN) -->
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
@@ -28,11 +28,14 @@
     #tabela td.col-medicamento { font-weight: 600; }
 
     .rodape { margin-top: 14px; font-size: 12px; color: #666; }
+
+    /* Deixa o rótulo "Buscar medicamento:" em negrito */
+    div.dataTables_filter label { font-weight: 700; }
   </style>
 </head>
 
 <body>
-  <h1>Consulta de Medicamentos</h1>
+  <h1>Catálogo de Medicamentos Homeopáticos - Nova Era</h1>
 
   <div class="topo">
     Para consultar, digite o nome do medicamento no campo <b>Buscar medicamento</b> abaixo.
@@ -69,7 +72,6 @@
     }
 
     function formatarDataHoraBR(d) {
-      // dd/mm/aaaa às hh:mm (sem mencionar fuso no texto)
       const optsData = { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", year: "numeric" };
       const optsHora = { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit", hour12: false };
       const data = new Intl.DateTimeFormat("pt-BR", optsData).format(d);
