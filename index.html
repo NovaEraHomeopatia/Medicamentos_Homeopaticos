@@ -15,11 +15,18 @@
 
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.4; }
-    h1 { margin-bottom: 6px; }
-    .topo { margin-bottom: 10px; color: #444; }
 
-    .meta { margin: 6px 0 14px; font-size: 13px; color: #555; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-    .pill { background: #f6f7f9; border: 1px solid #e3e6ea; padding: 6px 10px; border-radius: 999px; }
+    h1 { margin: 0 0 4px 0; }
+
+    /* Linha 2: atualizado em... menor */
+    .atualizado-linha {
+      margin: 0 0 10px 0; /* separa do texto da 3ª linha */
+      font-size: 13px;
+      color: #555;
+    }
+
+    /* Linha 3 */
+    .topo { margin: 0 0 12px 0; color: #444; }
 
     .loading { margin: 12px 0; }
     .erro { color: #b00020; font-weight: bold; margin: 12px 0; }
@@ -29,21 +36,23 @@
 
     .rodape { margin-top: 14px; font-size: 12px; color: #666; }
 
-    /* Deixa o rótulo "Buscar medicamento:" em negrito */
+    /* Negrito no rótulo "Buscar medicamento:" */
     div.dataTables_filter label { font-weight: 700; }
   </style>
 </head>
 
 <body>
+  <!-- Linha 1 -->
   <h1>Catálogo de Medicamentos Homeopáticos - Nova Era</h1>
 
-  <div class="topo">
-    Para consultar, digite o nome do medicamento no campo <b>Buscar medicamento</b> abaixo.
+  <!-- Linha 2 -->
+  <div class="atualizado-linha">
+    atualizado em <span id="dataAtualizacao">carregando…</span>
   </div>
 
-  <!-- Data e hora de atualização -->
-  <div class="meta">
-    <div class="pill"><b>Catálogo atualizado em</b> <span id="dataAtualizacao">carregando…</span></div>
+  <!-- Linha 3 -->
+  <div class="topo">
+    Para consultar, digite o nome do medicamento no campo <b>Buscar medicamento</b> abaixo.
   </div>
 
   <div id="status" class="loading">Carregando dados...</div>
@@ -62,7 +71,6 @@
     const DELIMITADOR = ";";
     const CABECALHO_PADRAO = ["Medicamento", "Escala", "Potências disponíveis"];
 
-    // Ajustado para o seu caso:
     const GITHUB_USER = "NovaEraHomeopatia";
     const GITHUB_REPO = "Medicamentos_Homeopaticos";
 
