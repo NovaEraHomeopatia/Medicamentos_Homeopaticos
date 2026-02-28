@@ -29,12 +29,6 @@
     table.dataTable thead th { white-space: nowrap; }
     #tabela td.col-medicamento { font-weight: 600; }
 
-    /* >>> IMPORTANTE: preserva múltiplos espaços e permite quebra de linha */
-    #tabela td.col-potencias {
-      white-space: pre-wrap;      /* preserva espaços e quebra linhas */
-      font-family: Consolas, "Courier New", monospace; /* melhora alinhamento visual */
-    }
-
     .rodape { margin-top: 14px; font-size: 12px; color: #666; }
   </style>
 </head>
@@ -79,11 +73,9 @@
     const GITHUB_USER = "NovaEraHomeopatia";
     const GITHUB_REPO = "Medicamentos_Homeopaticos";
 
-    // >>> NÃO colapsa espaços. Apenas remove quebras de linha duplicadas e trim.
     function normalizarPotencias(txt) {
       const s = (txt ?? "").toString();
-      // remove CR/LF, mas mantém os espaços internos (inclusive múltiplos)
-      return s.replace(/\r?\n/g, " ").trim();
+      return s.replace(/\s+/g, " ").trim();
     }
 
     function formatarDataNumericaBR(d) {
@@ -155,8 +147,7 @@
         tr.appendChild(td1);
 
         const td2 = document.createElement("td");
-        td2.textContent = potencias;      // mantém os múltiplos espaços
-        td2.className = "col-potencias";  // CSS preserva espaços
+        td2.textContent = potencias;
         tr.appendChild(td2);
 
         tbody.appendChild(tr);
