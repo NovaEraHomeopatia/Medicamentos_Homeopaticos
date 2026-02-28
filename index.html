@@ -24,7 +24,7 @@
       color: #555;
     }
 
-    /* BLOCO DE AÇÃO: mais destaque + ícone */
+    /* BLOCO DE AÇÃO (chamada) */
     .topo-destaque {
       margin: 0 0 14px 0;
       padding: 12px 14px;
@@ -39,14 +39,12 @@
       gap: 10px;
       align-items: flex-start;
     }
-    .topo-icone {
-      font-size: 20px;
-      line-height: 1;
-      margin-top: 1px;
+
+    .icone-alerta {
+      width: 20px;
+      height: 20px;
       flex: 0 0 auto;
-    }
-    .topo-texto {
-      flex: 1 1 auto;
+      margin-top: 1px;
     }
 
     .loading { margin: 12px 0; }
@@ -59,6 +57,14 @@
 
     /* Negrito no rótulo "Buscar medicamento:" */
     div.dataTables_filter label { font-weight: 700; }
+
+    /* Ícone da lupa (SVG) antes do label */
+    .icone-lupa {
+      width: 16px;
+      height: 16px;
+      vertical-align: -3px;
+      margin-right: 6px;
+    }
   </style>
 </head>
 
@@ -70,8 +76,14 @@
   </div>
 
   <div class="topo-destaque">
-    <div class="topo-icone">🔎</div>
-    <div class="topo-texto">
+    <!-- Triângulo de atenção (SVG, aparece sempre) -->
+    <svg class="icone-alerta" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 3L1 21h22L12 3z" fill="#c98a00"></path>
+      <rect x="11" y="9" width="2" height="7" fill="#ffffff"></rect>
+      <rect x="11" y="18" width="2" height="2" fill="#ffffff"></rect>
+    </svg>
+
+    <div>
       Para consultar, digite o nome do medicamento no campo <b>Buscar medicamento</b> abaixo.
     </div>
   </div>
@@ -112,6 +124,7 @@
       const el = document.getElementById("dataAtualizacao");
       if (!el) return;
 
+      // Plano A: Last-Modified via HEAD em dados.csv
       try {
         const resp = await fetch(ARQUIVO_CSV, { method: "HEAD", cache: "no-store" });
         const lm = resp.headers.get("Last-Modified");
@@ -121,6 +134,7 @@
         }
       } catch (e) {}
 
+      // Plano B: último commit do dados.csv via API do GitHub
       try {
         const api = `https://api.github.com/repos/${encodeURIComponent(GITHUB_USER)}/${encodeURIComponent(GITHUB_REPO)}/commits?path=${encodeURIComponent(ARQUIVO_CSV)}&per_page=1`;
         const resp = await fetch(api, { cache: "no-store" });
@@ -134,6 +148,22 @@
       } catch (e) {}
 
       el.textContent = "indisponível";
+    }
+
+    function inserirLupaNoCampoDeBusca() {
+      const $label = $('div.dataTables_filter label');
+      if ($label.length === 0) return;
+
+      // Evita duplicar se recarregar
+      if ($label.find('.icone-lupa').length > 0) return;
+
+      const lupaSvg =
+        `<svg class="icone-lupa" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" fill="none" stroke="#333" stroke-width="2"></circle>
+          <line x1="16.65" y1="16.65" x2="22" y2="22" stroke="#333" stroke-width="2" stroke-linecap="round"></line>
+        </svg>`;
+
+      $label.prepend(lupaSvg);
     }
 
     function montarTabela(cabecalho, linhas) {
@@ -191,6 +221,10 @@
         }
       });
 
+      // Coloca a lupa antes do "Buscar medicamento:"
+      inserirLupaNoCampoDeBusca();
+
+      // Busca só na coluna Medicamento
       const $input = $('div.dataTables_filter input');
       $input.off('keyup.DT input.DT');
       $input.on('input', function () {
