@@ -24,14 +24,29 @@
       color: #555;
     }
 
+    /* BLOCO DE AÇÃO: mais destaque + ícone */
     .topo-destaque {
       margin: 0 0 14px 0;
-      padding: 10px 12px;
+      padding: 12px 14px;
       background: #f6f7f9;
       border: 1px solid #e3e6ea;
       border-radius: 10px;
-      color: #333;
-      font-size: 15px; /* <- agora 15px */
+      color: #222;
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.25;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .topo-icone {
+      font-size: 20px;
+      line-height: 1;
+      margin-top: 1px;
+      flex: 0 0 auto;
+    }
+    .topo-texto {
+      flex: 1 1 auto;
     }
 
     .loading { margin: 12px 0; }
@@ -42,6 +57,7 @@
 
     .rodape { margin-top: 14px; font-size: 12px; color: #666; }
 
+    /* Negrito no rótulo "Buscar medicamento:" */
     div.dataTables_filter label { font-weight: 700; }
   </style>
 </head>
@@ -54,7 +70,10 @@
   </div>
 
   <div class="topo-destaque">
-    Para consultar, digite o nome do medicamento no campo <b>Buscar medicamento</b> abaixo.
+    <div class="topo-icone">🔎</div>
+    <div class="topo-texto">
+      Para consultar, digite o nome do medicamento no campo <b>Buscar medicamento</b> abaixo.
+    </div>
   </div>
 
   <div id="status" class="loading">Carregando dados...</div>
