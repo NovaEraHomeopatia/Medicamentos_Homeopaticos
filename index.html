@@ -15,17 +15,16 @@
 
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.4; }
-
     h1 { margin: 0 0 4px 0; }
 
-    .atualizado-linha {
+    .atualizado-linha{
       margin: 0 0 10px 0;
       font-size: 15px;
       color: #555;
     }
 
-    /* BLOCO DE AÇÃO (chamada) */
-    .topo-destaque {
+    /* BLOCO DE AÇÃO */
+    .topo-destaque{
       margin: 0 0 14px 0;
       padding: 12px 14px;
       background: #f6f7f9;
@@ -35,35 +34,29 @@
       font-size: 18px;
       font-weight: 600;
       line-height: 1.25;
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-    }
-
-    .icone-alerta {
-      width: 20px;
-      height: 20px;
-      flex: 0 0 auto;
-      margin-top: 1px;
     }
 
     .loading { margin: 12px 0; }
     .erro { color: #b00020; font-weight: bold; margin: 12px 0; }
-
     table.dataTable thead th { white-space: nowrap; }
     #tabela td.col-medicamento { font-weight: 600; }
-
     .rodape { margin-top: 14px; font-size: 12px; color: #666; }
 
-    /* Negrito no rótulo "Buscar medicamento:" */
+    /* Label do DataTables: deixa em negrito e adiciona lupa (SVG via CSS) */
     div.dataTables_filter label { font-weight: 700; }
 
-    /* Ícone da lupa (SVG) antes do label */
-    .icone-lupa {
+    div.dataTables_filter label::before{
+      content: "";
+      display: inline-block;
       width: 16px;
       height: 16px;
-      vertical-align: -3px;
       margin-right: 6px;
+      vertical-align: -3px;
+      background-repeat: no-repeat;
+      background-size: 16px 16px;
+
+      /* Lupa em SVG (sempre aparece) */
+      background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Ccircle%20cx='11'%20cy='11'%20r='7'%20fill='none'%20stroke='%23333'%20stroke-width='2'/%3E%3Cline%20x1='16.65'%20y1='16.65'%20x2='22'%20y2='22'%20stroke='%23333'%20stroke-width='2'%20stroke-linecap='round'/%3E%3C/svg%3E");
     }
   </style>
 </head>
@@ -76,16 +69,7 @@
   </div>
 
   <div class="topo-destaque">
-    <!-- Triângulo de atenção (SVG, aparece sempre) -->
-    <svg class="icone-alerta" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 3L1 21h22L12 3z" fill="#c98a00"></path>
-      <rect x="11" y="9" width="2" height="7" fill="#ffffff"></rect>
-      <rect x="11" y="18" width="2" height="2" fill="#ffffff"></rect>
-    </svg>
-
-    <div>
-      Para consultar, digite o nome do medicamento no campo <b>Buscar medicamento</b> abaixo.
-    </div>
+    Para consultar, digite o nome do medicamento no campo <b>Buscar medicamento</b> abaixo.
   </div>
 
   <div id="status" class="loading">Carregando dados...</div>
@@ -106,6 +90,7 @@
 
     const GITHUB_USER = "NovaEraHomeopatia";
     const GITHUB_REPO = "Medicamentos_Homeopaticos";
+    const GITHUB_BRANCH = "main";
 
     function normalizarPotencias(txt) {
       const s = (txt ?? "").toString();
@@ -113,6 +98,7 @@
     }
 
     function formatarDataHoraBR(d) {
+      // dd/mm/aaaa às hh:mm (sem escrever o fuso)
       const optsData = { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", year: "numeric" };
       const optsHora = { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit", hour12: false };
       const data = new Intl.DateTimeFormat("pt-BR", optsData).format(d);
@@ -124,9 +110,11 @@
       const el = document.getElementById("dataAtualizacao");
       if (!el) return;
 
-      // Plano A: Last-Modified via HEAD em dados.csv
+      // 1) Melhor fonte: HEAD no RAW do GitHub (hora do arquivo no GitHub)
+      const rawUrl = `https://raw.githubusercontent.com/${encodeURIComponent(GITHUB_USER)}/${encodeURIComponent(GITHUB_REPO)}/${encodeURIComponent(GITHUB_BRANCH)}/${encodeURIComponent(ARQUIVO_CSV)}`;
+
       try {
-        const resp = await fetch(ARQUIVO_CSV, { method: "HEAD", cache: "no-store" });
+        const resp = await fetch(rawUrl, { method: "HEAD", cache: "no-store" });
         const lm = resp.headers.get("Last-Modified");
         if (lm) {
           el.textContent = formatarDataHoraBR(new Date(lm));
@@ -134,7 +122,7 @@
         }
       } catch (e) {}
 
-      // Plano B: último commit do dados.csv via API do GitHub
+      // 2) Fallback: último commit especificamente do dados.csv (hora do upload/commit)
       try {
         const api = `https://api.github.com/repos/${encodeURIComponent(GITHUB_USER)}/${encodeURIComponent(GITHUB_REPO)}/commits?path=${encodeURIComponent(ARQUIVO_CSV)}&per_page=1`;
         const resp = await fetch(api, { cache: "no-store" });
@@ -148,22 +136,6 @@
       } catch (e) {}
 
       el.textContent = "indisponível";
-    }
-
-    function inserirLupaNoCampoDeBusca() {
-      const $label = $('div.dataTables_filter label');
-      if ($label.length === 0) return;
-
-      // Evita duplicar se recarregar
-      if ($label.find('.icone-lupa').length > 0) return;
-
-      const lupaSvg =
-        `<svg class="icone-lupa" viewBox="0 0 24 24" aria-hidden="true">
-          <circle cx="11" cy="11" r="7" fill="none" stroke="#333" stroke-width="2"></circle>
-          <line x1="16.65" y1="16.65" x2="22" y2="22" stroke="#333" stroke-width="2" stroke-linecap="round"></line>
-        </svg>`;
-
-      $label.prepend(lupaSvg);
     }
 
     function montarTabela(cabecalho, linhas) {
@@ -220,9 +192,6 @@
           paginate: { first: "Primeiro", previous: "Anterior", next: "Próximo", last: "Último" }
         }
       });
-
-      // Coloca a lupa antes do "Buscar medicamento:"
-      inserirLupaNoCampoDeBusca();
 
       // Busca só na coluna Medicamento
       const $input = $('div.dataTables_filter input');
