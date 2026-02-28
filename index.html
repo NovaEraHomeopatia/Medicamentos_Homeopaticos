@@ -24,8 +24,6 @@
     .loading { margin: 12px 0; }
     .erro { color: #b00020; font-weight: bold; margin: 12px 0; }
 
-    .dica { margin: 10px 0 16px; padding: 10px; background: #f6f7f9; border: 1px solid #e3e6ea; border-radius: 8px; color: #333; }
-
     table.dataTable thead th { white-space: nowrap; }
     #tabela td.col-medicamento { font-weight: 600; }
 
@@ -37,20 +35,12 @@
   <h1>Consulta de Medicamentos</h1>
 
   <div class="topo">
-    Para consultar, digite o nome do medicamento no campo <b>Buscar medicamento</b> abaixo à direita.
+    Para consultar, digite o nome do medicamento no campo <b>Buscar medicamento</b> abaixo.
   </div>
 
-  <!-- Data de atualização -->
+  <!-- Data e hora de atualização -->
   <div class="meta">
     <div class="pill"><b>Catálogo atualizado em</b> <span id="dataAtualizacao">carregando…</span></div>
-  </div>
-
-  <div class="dica">
-    <b>Dicas rápidas:</b>
-    <ul style="margin: 8px 0 0 18px;">
-      <li>Você pode digitar só parte do nome (ex.: <b>arnica</b>).</li>
-      <li>Para ver mais resultados de uma vez, use “Mostrar” e selecione <b>100</b>.</li>
-    </ul>
   </div>
 
   <div id="status" class="loading">Carregando dados...</div>
@@ -78,11 +68,13 @@
       return s.replace(/\s+/g, " ").trim();
     }
 
-    function formatarDataNumericaBR(d) {
-      const dd = String(d.getDate()).padStart(2, "0");
-      const mm = String(d.getMonth() + 1).padStart(2, "0");
-      const yyyy = d.getFullYear();
-      return `${dd}/${mm}/${yyyy}`;
+    function formatarDataHoraBR(d) {
+      // dd/mm/aaaa às hh:mm (sem mencionar fuso no texto)
+      const optsData = { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", year: "numeric" };
+      const optsHora = { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit", hour12: false };
+      const data = new Intl.DateTimeFormat("pt-BR", optsData).format(d);
+      const hora = new Intl.DateTimeFormat("pt-BR", optsHora).format(d);
+      return `${data} às ${hora}`;
     }
 
     async function atualizarDataDoCatalogo() {
@@ -94,7 +86,7 @@
         const resp = await fetch(ARQUIVO_CSV, { method: "HEAD", cache: "no-store" });
         const lm = resp.headers.get("Last-Modified");
         if (lm) {
-          el.textContent = formatarDataNumericaBR(new Date(lm));
+          el.textContent = formatarDataHoraBR(new Date(lm));
           return;
         }
       } catch (e) {}
@@ -107,7 +99,7 @@
         const data = await resp.json();
         const iso = data?.[0]?.commit?.committer?.date || data?.[0]?.commit?.author?.date;
         if (iso) {
-          el.textContent = formatarDataNumericaBR(new Date(iso));
+          el.textContent = formatarDataHoraBR(new Date(iso));
           return;
         }
       } catch (e) {}
@@ -219,7 +211,6 @@
       });
     }
 
-    // Start
     atualizarDataDoCatalogo();
     carregarCSV();
   </script>
