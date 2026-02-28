@@ -23,7 +23,7 @@
       color: #555;
     }
 
-    /* BLOCO DE AÇÃO */
+    /* BLOCO DE AÇÃO (reduzido 1px) */
     .topo-destaque{
       margin: 0 0 14px 0;
       padding: 12px 14px;
@@ -31,7 +31,7 @@
       border: 1px solid #e3e6ea;
       border-radius: 10px;
       color: #222;
-      font-size: 18px;
+      font-size: 17px;   /* <- era 18px */
       font-weight: 600;
       line-height: 1.25;
     }
@@ -42,9 +42,8 @@
     #tabela td.col-medicamento { font-weight: 600; }
     .rodape { margin-top: 14px; font-size: 12px; color: #666; }
 
-    /* Label do DataTables: deixa em negrito e adiciona lupa (SVG via CSS) */
+    /* Label do DataTables: negrito e lupa via CSS (SVG) */
     div.dataTables_filter label { font-weight: 700; }
-
     div.dataTables_filter label::before{
       content: "";
       display: inline-block;
@@ -54,8 +53,6 @@
       vertical-align: -3px;
       background-repeat: no-repeat;
       background-size: 16px 16px;
-
-      /* Lupa em SVG (sempre aparece) */
       background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Ccircle%20cx='11'%20cy='11'%20r='7'%20fill='none'%20stroke='%23333'%20stroke-width='2'/%3E%3Cline%20x1='16.65'%20y1='16.65'%20x2='22'%20y2='22'%20stroke='%23333'%20stroke-width='2'%20stroke-linecap='round'/%3E%3C/svg%3E");
     }
   </style>
@@ -98,7 +95,6 @@
     }
 
     function formatarDataHoraBR(d) {
-      // dd/mm/aaaa às hh:mm (sem escrever o fuso)
       const optsData = { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", year: "numeric" };
       const optsHora = { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit", hour12: false };
       const data = new Intl.DateTimeFormat("pt-BR", optsData).format(d);
@@ -110,7 +106,6 @@
       const el = document.getElementById("dataAtualizacao");
       if (!el) return;
 
-      // 1) Melhor fonte: HEAD no RAW do GitHub (hora do arquivo no GitHub)
       const rawUrl = `https://raw.githubusercontent.com/${encodeURIComponent(GITHUB_USER)}/${encodeURIComponent(GITHUB_REPO)}/${encodeURIComponent(GITHUB_BRANCH)}/${encodeURIComponent(ARQUIVO_CSV)}`;
 
       try {
@@ -122,7 +117,6 @@
         }
       } catch (e) {}
 
-      // 2) Fallback: último commit especificamente do dados.csv (hora do upload/commit)
       try {
         const api = `https://api.github.com/repos/${encodeURIComponent(GITHUB_USER)}/${encodeURIComponent(GITHUB_REPO)}/commits?path=${encodeURIComponent(ARQUIVO_CSV)}&per_page=1`;
         const resp = await fetch(api, { cache: "no-store" });
@@ -193,7 +187,6 @@
         }
       });
 
-      // Busca só na coluna Medicamento
       const $input = $('div.dataTables_filter input');
       $input.off('keyup.DT input.DT');
       $input.on('input', function () {
