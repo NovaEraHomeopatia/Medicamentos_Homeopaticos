@@ -16,17 +16,14 @@
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.4; }
 
-    /* Linha 1 */
     h1 { margin: 0 0 4px 0; }
 
-    /* Linha 2: menor que o título e maior que a instrução */
     .atualizado-linha {
       margin: 0 0 10px 0;
       font-size: 15px;
       color: #555;
     }
 
-    /* Linha 3: destaque da instrução (1px maior) */
     .topo-destaque {
       margin: 0 0 14px 0;
       padding: 10px 12px;
@@ -34,7 +31,7 @@
       border: 1px solid #e3e6ea;
       border-radius: 10px;
       color: #333;
-      font-size: 14px;  /* <- era 13px */
+      font-size: 15px; /* <- agora 15px */
     }
 
     .loading { margin: 12px 0; }
@@ -45,7 +42,6 @@
 
     .rodape { margin-top: 14px; font-size: 12px; color: #666; }
 
-    /* Negrito no rótulo "Buscar medicamento:" */
     div.dataTables_filter label { font-weight: 700; }
   </style>
 </head>
@@ -97,7 +93,6 @@
       const el = document.getElementById("dataAtualizacao");
       if (!el) return;
 
-      // Plano A: Last-Modified via HEAD em dados.csv
       try {
         const resp = await fetch(ARQUIVO_CSV, { method: "HEAD", cache: "no-store" });
         const lm = resp.headers.get("Last-Modified");
@@ -107,7 +102,6 @@
         }
       } catch (e) {}
 
-      // Plano B: último commit do dados.csv via API do GitHub
       try {
         const api = `https://api.github.com/repos/${encodeURIComponent(GITHUB_USER)}/${encodeURIComponent(GITHUB_REPO)}/commits?path=${encodeURIComponent(ARQUIVO_CSV)}&per_page=1`;
         const resp = await fetch(api, { cache: "no-store" });
@@ -178,7 +172,6 @@
         }
       });
 
-      // Busca só na coluna Medicamento
       const $input = $('div.dataTables_filter input');
       $input.off('keyup.DT input.DT');
       $input.on('input', function () {
