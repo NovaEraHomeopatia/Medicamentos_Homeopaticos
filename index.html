@@ -23,7 +23,7 @@
       color: #555;
     }
 
-    /* BLOCO DE AÇÃO (reduzido 1px) */
+    /* BLOCO DE AÇÃO (reduzido mais claramente) */
     .topo-destaque{
       margin: 0 0 14px 0;
       padding: 12px 14px;
@@ -31,15 +31,33 @@
       border: 1px solid #e3e6ea;
       border-radius: 10px;
       color: #222;
-      font-size: 17px;   /* <- era 18px */
+      font-size: 16px;  /* <- agora 16px */
       font-weight: 600;
       line-height: 1.25;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .icone-alerta {
+      width: 20px;
+      height: 20px;
+      flex: 0 0 auto;
+      margin-top: 1px;
     }
 
     .loading { margin: 12px 0; }
     .erro { color: #b00020; font-weight: bold; margin: 12px 0; }
+
     table.dataTable thead th { white-space: nowrap; }
     #tabela td.col-medicamento { font-weight: 600; }
+
+    /* >>> GARANTE O “ESPAÇO 3” NA COLUNA DE POTÊNCIAS <<< */
+    #tabela td.col-potencias {
+      white-space: pre-wrap;              /* respeita espaços */
+      font-variant-numeric: tabular-nums; /* números mais alinhados */
+    }
+
     .rodape { margin-top: 14px; font-size: 12px; color: #666; }
 
     /* Label do DataTables: negrito e lupa via CSS (SVG) */
@@ -66,7 +84,14 @@
   </div>
 
   <div class="topo-destaque">
-    Para consultar, digite o nome do medicamento no campo <b>Buscar medicamento</b> abaixo.
+    <svg class="icone-alerta" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 3L1 21h22L12 3z" fill="#c98a00"></path>
+      <rect x="11" y="9" width="2" height="7" fill="#ffffff"></rect>
+      <rect x="11" y="18" width="2" height="2" fill="#ffffff"></rect>
+    </svg>
+    <div>
+      Para consultar, digite o nome do medicamento no campo <b>Buscar medicamento</b> abaixo.
+    </div>
   </div>
 
   <div id="status" class="loading">Carregando dados...</div>
@@ -89,9 +114,12 @@
     const GITHUB_REPO = "Medicamentos_Homeopaticos";
     const GITHUB_BRANCH = "main";
 
+    // Gera exatamente “espaço 3” entre tokens
     function normalizarPotencias(txt) {
-      const s = (txt ?? "").toString();
-      return s.replace(/\s+/g, " ").trim();
+      const s = (txt ?? "").toString().trim();
+      if (!s) return "";
+      // pega qualquer sequência de whitespace e troca por 3 espaços
+      return s.replace(/\s+/g, "   ");
     }
 
     function formatarDataHoraBR(d) {
@@ -120,7 +148,6 @@
       try {
         const api = `https://api.github.com/repos/${encodeURIComponent(GITHUB_USER)}/${encodeURIComponent(GITHUB_REPO)}/commits?path=${encodeURIComponent(ARQUIVO_CSV)}&per_page=1`;
         const resp = await fetch(api, { cache: "no-store" });
-        if (!resp.ok) throw new Error("Falha na API do GitHub");
         const data = await resp.json();
         const iso = data?.[0]?.commit?.committer?.date || data?.[0]?.commit?.author?.date;
         if (iso) {
@@ -165,6 +192,7 @@
 
         const td2 = document.createElement("td");
         td2.textContent = potencias;
+        td2.className = "col-potencias";
         tr.appendChild(td2);
 
         tbody.appendChild(tr);
@@ -187,6 +215,7 @@
         }
       });
 
+      // Busca só na coluna Medicamento
       const $input = $('div.dataTables_filter input');
       $input.off('keyup.DT input.DT');
       $input.on('input', function () {
