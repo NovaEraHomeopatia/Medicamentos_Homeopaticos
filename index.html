@@ -19,14 +19,14 @@
     /* Linha 1 */
     h1 { margin: 0 0 4px 0; }
 
-    /* Linha 2: entre título e instrução (menor que h1, maior que instrução) */
+    /* Linha 2: menor que o título e maior que a instrução */
     .atualizado-linha {
       margin: 0 0 10px 0;
-      font-size: 15px;      /* <- maior que a instrução e menor que o h1 */
+      font-size: 15px;
       color: #555;
     }
 
-    /* Linha 3: destaque da instrução */
+    /* Linha 3: destaque da instrução (1px maior) */
     .topo-destaque {
       margin: 0 0 14px 0;
       padding: 10px 12px;
@@ -34,7 +34,7 @@
       border: 1px solid #e3e6ea;
       border-radius: 10px;
       color: #333;
-      font-size: 13px;      /* <- menor que a linha "Atualizado em..." */
+      font-size: 14px;  /* <- era 13px */
     }
 
     .loading { margin: 12px 0; }
@@ -51,15 +51,12 @@
 </head>
 
 <body>
-  <!-- Linha 1 -->
   <h1>Catálogo de Medicamentos Homeopáticos - Nova Era</h1>
 
-  <!-- Linha 2 -->
   <div class="atualizado-linha">
-    Atualizado em <span id="dataAtualizacao">carregando…</span>
+    <span>Atualizado em </span><span id="dataAtualizacao">carregando…</span>
   </div>
 
-  <!-- Linha 3 -->
   <div class="topo-destaque">
     Para consultar, digite o nome do medicamento no campo <b>Buscar medicamento</b> abaixo.
   </div>
