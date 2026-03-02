@@ -3,14 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Catálogo de Medicamentos Homeopáticos</title>
+  <title>Catálogo de Homeopatia</title>
 
   <!-- DataTables + jQuery (CDN) -->
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
-
-  <!-- PapaParse para ler CSV -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
   <style>
@@ -18,43 +15,53 @@
 
     /* Logo centralizada */
     .topo-logo { text-align: center; margin: 10px 0 8px; }
-    .topo-logo img { max-width: 280px; width: 60%; height: auto; }
+    .topo-logo img { max-width: 260px; width: 58%; height: auto; }
 
-    /* Título centralizado */
-    h1 { margin: 0 0 4px 0; text-align: center; }
+    /* Título centralizado e responsivo (menor no celular) */
+    h1 {
+      margin: 0 0 4px 0;
+      text-align: center;
+      font-size: 34px;
+      line-height: 1.15;
+    }
+    @media (max-width: 480px) {
+      h1 { font-size: 26px; }
+    }
 
     .atualizado-linha{
       margin: 0 0 10px 0;
-      font-size: 15px;
+      font-size: 14px;
       color: #555;
       text-align: center;
     }
 
-    /* BLOCO DE AÇÃO (última versão, com alerta) */
+    /* Aviso compacto */
     .topo-destaque{
-      margin: 0 0 14px 0;
-      padding: 12px 14px;
+      margin: 0 0 12px 0;
+      padding: 10px 12px;
       background: #f6f7f9;
       border: 1px solid #e3e6ea;
       border-radius: 10px;
       color: #222;
-      font-size: 17px;
+      font-size: 14px;
       font-weight: 600;
-      line-height: 1.25;
+      line-height: 1.2;
       display: flex;
       gap: 10px;
-      align-items: flex-start;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
     }
 
     .icone-alerta {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       flex: 0 0 auto;
-      margin-top: 1px;
     }
 
     .loading { margin: 12px 0; }
     .erro { color: #b00020; font-weight: bold; margin: 12px 0; }
+
     table.dataTable thead th { white-space: nowrap; }
     #tabela td.col-medicamento { font-weight: 600; }
 
@@ -66,8 +73,10 @@
 
     .rodape { margin-top: 14px; font-size: 12px; color: #666; }
 
-    /* Label do DataTables: negrito e lupa via CSS (SVG) */
-    div.dataTables_filter label { font-weight: 700; }
+    /* Label do DataTables: negrito e lupa via CSS (SVG) + texto BUSCAR */
+    div.dataTables_filter label { font-weight: 800; text-transform: uppercase; }
+
+    /* trocamos "Buscar medicamento:" por "BUSCAR:" via JS; aqui só garantimos o ícone */
     div.dataTables_filter label::before{
       content: "";
       display: inline-block;
@@ -79,6 +88,12 @@
       background-size: 16px 16px;
       background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Ccircle%20cx='11'%20cy='11'%20r='7'%20fill='none'%20stroke='%23333'%20stroke-width='2'/%3E%3Cline%20x1='16.65'%20y1='16.65'%20x2='22'%20y2='22'%20stroke='%23333'%20stroke-width='2'%20stroke-linecap='round'/%3E%3C/svg%3E");
     }
+
+    /* Campo de busca um pouco mais “presente” */
+    div.dataTables_filter input {
+      padding: 6px 8px;
+      font-size: 14px;
+    }
   </style>
 </head>
 
@@ -89,7 +104,7 @@
   </div>
 
   <!-- Título -->
-  <h1>Catálogo de Medicamentos Homeopáticos</h1>
+  <h1>Catálogo de Homeopatia</h1>
 
   <div class="atualizado-linha">
     <span>Atualizado em </span><span id="dataAtualizacao">carregando…</span>
@@ -101,9 +116,7 @@
       <rect x="11" y="9" width="2" height="7" fill="#ffffff"></rect>
       <rect x="11" y="18" width="2" height="2" fill="#ffffff"></rect>
     </svg>
-    <div>
-      Para consultar, digite o nome do medicamento no campo <b>Buscar medicamento</b> abaixo.
-    </div>
+    <div>Digite o medicamento no campo <b>BUSCAR</b> abaixo.</div>
   </div>
 
   <div id="status" class="loading">Carregando dados...</div>
@@ -145,7 +158,6 @@
       const el = document.getElementById("dataAtualizacao");
       if (!el) return;
 
-      // Melhor fonte: HEAD no RAW do GitHub (hora do arquivo no GitHub)
       const rawUrl = `https://raw.githubusercontent.com/${encodeURIComponent(GITHUB_USER)}/${encodeURIComponent(GITHUB_REPO)}/${encodeURIComponent(GITHUB_BRANCH)}/${encodeURIComponent(ARQUIVO_CSV)}`;
 
       try {
@@ -157,7 +169,6 @@
         }
       } catch (e) {}
 
-      // Fallback: último commit do dados.csv (hora do upload/commit)
       try {
         const api = `https://api.github.com/repos/${encodeURIComponent(GITHUB_USER)}/${encodeURIComponent(GITHUB_REPO)}/commits?path=${encodeURIComponent(ARQUIVO_CSV)}&per_page=1`;
         const resp = await fetch(api, { cache: "no-store" });
@@ -170,6 +181,20 @@
       } catch (e) {}
 
       el.textContent = "indisponível";
+    }
+
+    function ajustarRotuloBuscar() {
+      // Troca "Buscar medicamento:" por "BUSCAR:" dentro do label, mantendo o input
+      const label = document.querySelector("div.dataTables_filter label");
+      if (!label) return;
+
+      // O DataTables normalmente cria: <label>Buscar medicamento:<input ...></label>
+      // Vamos garantir que o texto antes do input seja "BUSCAR:"
+      for (const node of Array.from(label.childNodes)) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          node.nodeValue = "BUSCAR: ";
+        }
+      }
     }
 
     function montarTabela(cabecalho, linhas) {
@@ -211,12 +236,13 @@
         tbody.appendChild(tr);
       });
 
-      const dt = $('#tabela').DataTable({
+      // DataTables (carrega aqui porque o repo já está funcionando com DataTables no GitHub Pages)
+      const dt = window.jQuery('#tabela').DataTable({
         pageLength: 100,
         lengthMenu: [10, 25, 50, 100],
         order: [],
         language: {
-          search: "Buscar medicamento:",
+          search: "BUSCAR:",
           lengthMenu: "Mostrar _MENU_ registros",
           info: "Mostrando de _START_ até _END_ de _TOTAL_ registros",
           infoEmpty: "Mostrando 0 até 0 de 0 registros",
@@ -228,8 +254,11 @@
         }
       });
 
+      // Garante que o texto do label fique exatamente "BUSCAR:"
+      ajustarRotuloBuscar();
+
       // Busca só na coluna Medicamento
-      const $input = $('div.dataTables_filter input');
+      const $input = window.jQuery('div.dataTables_filter input');
       $input.off('keyup.DT input.DT');
       $input.on('input', function () {
         const q = this.value || "";
@@ -280,5 +309,8 @@
     atualizarDataDoCatalogo();
     carregarCSV();
   </script>
+
+  <!-- DataTables JS (mantido ao final para melhor carregamento) -->
+  <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
 </body>
 </html>
