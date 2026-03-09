@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Catálogo de Homeopatia - Lojas</title>
+
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.4; }
+    .topo-logo { text-align: center; margin: 10px 0 8px; }
+    .topo-logo img { max-width: 260px; width: 58%; height: auto; }
+    h1 {
+      margin: 0 0 4px 0;
+      text-align: center;
+      font-size: 34px;
+      line-height: 1.15;
+    }
+    @media (max-width: 480px) {
+      h1 { font-size: 26px; }
+    }
+    .atualizado-linha{
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      color: #555;
+      text-align: center;
+    }
+    .topo-destaque{
+      margin: 0 0 12px 0;
+      padding: 10px 12px;
+      background: #f6f7f9;
+      border: 1px solid #e3e6ea;
+      border-radius: 10px;
+      color: #222;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.2;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .icone-alerta {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+    }
+    .loading { margin: 12px 0; }
+    .erro { color: #b00020; font-weight: bold; margin: 12px 0; }
+    table.dataTable thead th { white-space: nowrap; }
+    #tabela td.col-medicamento { font-weight: 600; }
+    #tabela td.col-potencias {
+      white-space: pre-wrap;
+      font-variant-numeric: tabular-nums;
+    }
+    .rodape { margin-top: 14px; font-size: 12px; color: #666; }
+    div.dataTables_filter label { font-weight: 800; text-transform: uppercase; }
+    div.dataTables_filter label::before{
+      content: "";
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      margin-right: 6px;
+      vertical-align: -3px;
+      background-repeat: no-repeat;
+      background-size: 16px 16px;
+      background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Ccircle%20cx='11'%20cy='11'%20r='7'%20fill='none'%20stroke='%23333'%20stroke-width='2'/%3E%3Cline%20x1='16.65'%20y1='16.65'%20x2='22'%20y2='22'%20stroke='%23333'%20stroke-width='2'%20stroke-linecap='round'/%3E%3C/svg%3E");
+    }
+    div.dataTables_filter input {
+      padding: 6px 8px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topo-logo">
+    <img src="logo.png" alt="Nova Era" />
+  </div>
+
+  <h1>Catálogo de Homeopatia - Lojas</h1>
+
+  <div class="atualizado-linha">
+    <span>Atualizado em </span><span id="dataAtualizacao">carregando…</span>
+  </div>
+
+  <div class="topo-destaque">
+    <svg class="icone-alerta" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 3L1 21h22L12 3z" fill="#c98a00"></path>
+      <rect x="11" y="9" width="2" height="7" fill="#ffffff"></rect>
+      <rect x="11" y="18" width="2" height="2" fill="#ffffff"></rect>
+    </svg>
+    <div>Uso interno das lojas. Digite o medicamento no campo <b>BUSCAR</b> abaixo.</div>
+  </div>
+
+  <div id="status" class="loading">Carregando dados...</div>
+
+  <table id="tabela" class="display" style="width:100%">
+    <thead></thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="rodape">
+    Se a lista for atualizada, basta substituir o arquivo <b>dadoslojas.csv</b> no repositório.
+  </div>
+
+  <script>
+    const ARQUIVO_CSV = "dadoslojas.csv";
+    const DELIMITADOR = ";";
+    const CABECALHO_PADRAO = ["Medicamento", "Escala", "Potências disponíveis"];
+
+    const GITHUB_USER = "NovaEraHomeopatia";
+    const GITHUB_REPO = "Medicamentos_Homeopaticos";
+    const GITHUB_BRANCH = "main";
+
+    function normalizarPotencias(txt) {
+      const s = (txt ?? "").toString().trim();
+      if (!s) return "";
+      return s.replace(/\s+/g, "   ");
+    }
+
+    function formatarDataHoraBR(d) {
+      const optsData = { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", year: "numeric" };
+      const optsHora = { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit", hour12: false };
+      const data = new Intl.DateTimeFormat("pt-BR", optsData).format(d);
+      const hora = new Intl.DateTimeFormat("pt-BR", optsHora).format(d);
+      return `${data} às ${hora}`;
+    }
+
+    async function atualizarDataDoCatalogo() {
+      const el = document.getElementById("dataAtualizacao");
+      if (!el) return;
+
+      const rawUrl = `https://raw.githubusercontent.com/${encodeURIComponent(GITHUB_USER)}/${encodeURIComponent(GITHUB_REPO)}/${encodeURIComponent(GITHUB_BRANCH)}/${encodeURIComponent(ARQUIVO_CSV)}?v=${Date.now()}`;
+
+      try {
+        const resp = await fetch(rawUrl, { method: "HEAD", cache: "no-store" });
+        const lm = resp.headers.get("Last-Modified");
+        if (lm) {
+          el.textContent = formatarDataHoraBR(new Date(lm));
+          return;
+        }
+      } catch (e) {}
+
+      try {
+        const api = `https://api.github.com/repos/${encodeURIComponent(GITHUB_USER)}/${encodeURIComponent(GITHUB_REPO)}/commits?path=${encodeURIComponent(ARQUIVO_CSV)}&per_page=1`;
+        const resp = await fetch(api, { cache: "no-store" });
+        const data = await resp.json();
+        const iso = data?.[0]?.commit?.committer?.date || data?.[0]?.commit?.author?.date;
+        if (iso) {
+          el.textContent = formatarDataHoraBR(new Date(iso));
+          return;
+        }
+      } catch (e) {}
+
+      el.textContent = "indisponível";
+    }
+
+    function ajustarRotuloBuscar() {
+      const label = document.querySelector("div.dataTables_filter label");
+      if (!label) return;
+
+      for (const node of Array.from(label.childNodes)) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          node.nodeValue = "BUSCAR: ";
+        }
+      }
+    }
+
+    function montarTabela(cabecalho, linhas) {
+      const thead = document.querySelector("#tabela thead");
+      const trHead = document.createElement("tr");
+      cabecalho.forEach(col => {
+        const th = document.createElement("th");
+        th.textContent = col || "";
+        trHead.appendChild(th);
+      });
+      thead.appendChild(trHead);
+
+      const tbody = document.querySelector("#tabela tbody");
+
+      linhas.forEach(linha => {
+        const temConteudo = linha.some(c => String(c ?? "").trim() !== "");
+        if (!temConteudo) return;
+
+        const tr = document.createElement("tr");
+
+        linha.forEach((cel, idx) => {
+          const td = document.createElement("td");
+          const valor = String(cel ?? "");
+
+          if (idx === 0) td.classList.add("col-medicamento");
+          if (idx === 2) {
+            td.classList.add("col-potencias");
+            td.textContent = normalizarPotencias(valor);
+          } else {
+            td.textContent = valor;
+          }
+          tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+      });
+
+      const tabela = $("#tabela").DataTable({
+        pageLength: 25,
+        lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+        order: [[0, "asc"], [1, "asc"]],
+        language: {
+          decimal: ",",
+          thousands: ".",
+          lengthMenu: "Mostrar _MENU_ registros",
+          zeroRecords: "Nenhum resultado encontrado",
+          info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+          infoEmpty: "Mostrando 0 a 0 de 0 registros",
+          infoFiltered: "(filtrado de _MAX_ registros no total)",
+          search: "Buscar:",
+          paginate: {
+            first: "Primeira",
+            previous: "Anterior",
+            next: "Proxima",
+            last: "Ultima"
+          }
+        },
+        initComplete: function () {
+          ajustarRotuloBuscar();
+          document.getElementById("status").style.display = "none";
+        }
+      });
+
+      return tabela;
+    }
+
+    function carregarCSV() {
+      Papa.parse(ARQUIVO_CSV, {
+        download: true,
+        header: false,
+        delimiter: DELIMITADOR,
+        skipEmptyLines: true,
+        encoding: "UTF-8",
+        complete: function (results) {
+          if (!results || !results.data || !results.data.length) {
+            document.getElementById("status").className = "erro";
+            document.getElementById("status").textContent = "Nao foi possivel carregar os dados.";
+            return;
+          }
+
+          const linhas = results.data;
+          let cabecalho = CABECALHO_PADRAO;
+          let corpo = linhas;
+
+          if (linhas[0] && linhas[0].length >= 3) {
+            const h0 = String(linhas[0][0] ?? "").trim().toLowerCase();
+            const h1 = String(linhas[0][1] ?? "").trim().toLowerCase();
+            const h2 = String(linhas[0][2] ?? "").trim().toLowerCase();
+
+            if (h0 === "medicamento" && h1 === "escala" && h2.indexOf("pot") === 0) {
+              cabecalho = linhas[0];
+              corpo = linhas.slice(1);
+            }
+          }
+
+          montarTabela(cabecalho, corpo);
+        },
+        error: function () {
+          document.getElementById("status").className = "erro";
+          document.getElementById("status").textContent = "Erro ao carregar o arquivo CSV.";
+        }
+      });
+    }
+
+    atualizarDataDoCatalogo();
+    carregarCSV();
+  </script>
+</body>
+</html>
