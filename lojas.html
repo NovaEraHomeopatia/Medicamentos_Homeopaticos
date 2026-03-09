@@ -227,6 +227,22 @@
         }
       });
 
+      function escaparRegex(txt) {
+        return String(txt).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      }
+
+      const $input = window.jQuery('div.dataTables_filter input');
+      $input.off('keyup.DT input.DT');
+      $input.on('input', function () {
+        const q = (this.value || "").trim();
+        tabela.columns().search("");
+        if (!q) {
+          tabela.column(0).search("").draw();
+        } else {
+          tabela.column(0).search("^" + escaparRegex(q), true, false).draw();
+        }
+      });
+
       return tabela;
     }
 
