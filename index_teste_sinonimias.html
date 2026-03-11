@@ -14,34 +14,76 @@
     body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.4; }
     h1 { margin: 0 0 4px 0; text-align: center; font-size: 34px; line-height: 1.15; }
     @media (max-width: 480px) { h1 { font-size: 26px; } }
+
     .atualizado-linha { margin: 0 0 10px 0; font-size: 14px; color: #555; text-align: center; }
+
     .topo-destaque {
       margin: 0 0 12px 0; padding: 10px 12px; background: #f6f7f9; border: 1px solid #e3e6ea;
       border-radius: 10px; color: #222; font-size: 14px; font-weight: 600; line-height: 1.2;
       display: flex; gap: 10px; align-items: center; justify-content: center; text-align: center;
     }
+
     .icone-alerta { width: 18px; height: 18px; flex: 0 0 auto; }
+
     .loading { margin: 12px 0; }
     .erro { color: #b00020; font-weight: bold; margin: 12px 0; }
+
     .info-teste {
       margin: 0 0 12px 0; padding: 10px 12px; background: #eef6ff; border: 1px solid #b7d3f2;
       border-radius: 10px; color: #154b82; font-size: 14px; text-align: center;
     }
-    .sinonimia-aviso{
-      display:none; margin:0 0 12px 0; padding:10px 12px; background:#fff7e6; border:1px solid #f0d58a;
-      border-radius:10px; color:#6b4e00; font-size:14px; line-height:1.35; text-align:center;
+
+    .sinonimia-aviso {
+      display: none; margin: 0 0 12px 0; padding: 10px 12px; background: #fff7e6; border: 1px solid #f0d58a;
+      border-radius: 10px; color: #6b4e00; font-size: 14px; line-height: 1.35; text-align: center;
     }
+
+    .barra-busca {
+      display: flex; justify-content: flex-end; align-items: center; gap: 10px;
+      margin: 8px 0 14px 0;
+    }
+
+    .barra-busca label {
+      font-weight: 800;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 18px;
+    }
+
+    .barra-busca label::before {
+      content: "";
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      background-repeat: no-repeat;
+      background-size: 18px 18px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='7' fill='none' stroke='%23333' stroke-width='2'/%3E%3Cline x1='16.65' y1='16.65' x2='22' y2='22' stroke='%23333' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+    }
+
+    .barra-busca input {
+      padding: 6px 8px;
+      font-size: 14px;
+      width: 280px;
+      max-width: 100%;
+    }
+
     table.dataTable thead th { white-space: nowrap; }
     #tabela td.col-medicamento, #tabela td.col-termo { font-weight: 600; }
     #tabela td.col-potencias { white-space: pre-wrap; font-variant-numeric: tabular-nums; }
     .rodape { margin-top: 14px; font-size: 12px; color: #666; }
-    div.dataTables_filter label { font-weight: 800; text-transform: uppercase; }
-    div.dataTables_filter label::before{
-      content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 6px; vertical-align: -3px;
-      background-repeat: no-repeat; background-size: 16px 16px;
-      background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Ccircle%20cx='11'%20cy='11'%20r='7'%20fill='none'%20stroke='%23333'%20stroke-width='2'/%3E%3Cline%20x1='16.65'%20y1='16.65'%20x2='22'%20y2='22'%20stroke='%23333'%20stroke-width='2'%20stroke-linecap='round'/%3E%3C/svg%3E");
+
+    @media (max-width: 640px) {
+      .barra-busca {
+        justify-content: stretch;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .barra-busca input {
+        width: 100%;
+      }
     }
-    div.dataTables_filter input { padding: 6px 8px; font-size: 14px; }
   </style>
 </head>
 
@@ -67,6 +109,11 @@
 
   <div id="avisoSinonimia" class="sinonimia-aviso"></div>
   <div id="status" class="loading">Carregando dados...</div>
+
+  <div class="barra-busca">
+    <label for="buscaExterna">BUSCAR:</label>
+    <input id="buscaExterna" type="text" autocomplete="off" spellcheck="false">
+  </div>
 
   <table id="tabela" class="display" style="width:100%">
     <thead></thead>
@@ -134,16 +181,6 @@
       el.textContent = "indisponivel";
     }
 
-    function ajustarRotuloBuscar() {
-      const label = document.querySelector("div.dataTables_filter label");
-      if (!label) return;
-      for (const node of Array.from(label.childNodes)) {
-        if (node.nodeType === Node.TEXT_NODE) {
-          node.nodeValue = "BUSCAR: ";
-        }
-      }
-    }
-
     function limparAvisoSinonimia() {
       const el = document.getElementById("avisoSinonimia");
       if (!el) return;
@@ -171,19 +208,23 @@
 
       const thead = document.querySelector("#tabela thead");
       const trHead = document.createElement("tr");
+
       cabecalho.forEach(col => {
         const th = document.createElement("th");
         th.textContent = col || "";
         trHead.appendChild(th);
       });
+
       thead.appendChild(trHead);
 
       const tbody = document.querySelector("#tabela tbody");
       linhas.forEach(linha => {
         const tr = document.createElement("tr");
+
         linha.forEach((cel, idx) => {
           const td = document.createElement("td");
           const valor = String(cel ?? "");
+
           if (tipo === "normal") {
             if (idx === 0) td.classList.add("col-medicamento");
             if (idx === 2) {
@@ -197,8 +238,10 @@
             if (idx === 1) td.classList.add("col-potencias");
             td.textContent = idx === 1 ? normalizarPotencias(valor) : valor;
           }
+
           tr.appendChild(td);
         });
+
         tbody.appendChild(tr);
       });
 
@@ -206,6 +249,7 @@
         pageLength: 100,
         lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
         order: [],
+        dom: "lrtip",
         language: {
           decimal: ",",
           thousands: ".",
@@ -214,7 +258,6 @@
           info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
           infoEmpty: "Mostrando 0 a 0 de 0 registros",
           infoFiltered: "(filtrado de _MAX_ registros no total)",
-          search: "Buscar:",
           paginate: {
             first: "Primeira",
             previous: "Anterior",
@@ -223,15 +266,8 @@
           }
         },
         initComplete: function () {
-          ajustarRotuloBuscar();
           document.getElementById("status").style.display = "none";
         }
-      });
-
-      const $input = $('div.dataTables_filter input');
-      $input.off('keyup.DT input.DT');
-      $input.on('input', function () {
-        aplicarBusca(this.value || "");
       });
     }
 
@@ -286,7 +322,7 @@
                 medicamentoNorm: normalizarBusca(r.MEDICAMENTO ?? "")
               })).filter(x => x.sinonimiaNorm && x.medicamentoNorm);
 
-              montarTabela(CABECALHO_NORMAL, [], "normal");
+              aplicarBusca(document.getElementById("buscaExterna").value || "");
               document.getElementById("status").textContent = "";
             },
             error: function () {
@@ -328,6 +364,7 @@
       }
 
       const grupos = new Map();
+
       for (const s of sinonimiasEncontradas) {
         if (!grupos.has(s.sinonimiaNorm)) {
           grupos.set(s.sinonimiaNorm, {
@@ -340,8 +377,10 @@
       }
 
       const linhasSinonimia = [];
+
       for (const g of grupos.values()) {
         const pares = [];
+
         dadosCatalogo.forEach(r => {
           if (g.medicamentosNorm.has(r.medicamentoNorm)) {
             const parte = r.escala ? `${r.escala}: ${r.potencias}` : r.potencias;
@@ -361,6 +400,10 @@
         montarTabela(CABECALHO_NORMAL, [], "normal");
       }
     }
+
+    document.getElementById("buscaExterna").addEventListener("input", function () {
+      aplicarBusca(this.value || "");
+    });
 
     atualizarDataDoCatalogo();
     carregarArquivos();
