@@ -11,35 +11,94 @@
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.4; }
-    h1 { margin: 0 0 4px 0; text-align: center; font-size: 34px; line-height: 1.15; }
-    @media (max-width: 480px) { h1 { font-size: 26px; } }
-
-    .atualizado-linha { margin: 0 0 10px 0; font-size: 14px; color: #555; text-align: center; }
-
-    .topo-destaque {
-      margin: 0 0 12px 0; padding: 10px 12px; background: #f6f7f9; border: 1px solid #e3e6ea;
-      border-radius: 10px; color: #222; font-size: 14px; font-weight: 600; line-height: 1.2;
-      display: flex; gap: 10px; align-items: center; justify-content: center; text-align: center;
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      line-height: 1.4;
     }
 
-    .icone-alerta { width: 18px; height: 18px; flex: 0 0 auto; }
+    h1 {
+      margin: 0 0 4px 0;
+      text-align: center;
+      font-size: 34px;
+      line-height: 1.15;
+    }
 
-    .loading { margin: 12px 0; }
-    .erro { color: #b00020; font-weight: bold; margin: 12px 0; }
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 26px;
+      }
+    }
+
+    .atualizado-linha {
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      color: #555;
+      text-align: center;
+    }
+
+    .topo-destaque {
+      margin: 0 0 12px 0;
+      padding: 10px 12px;
+      background: #f6f7f9;
+      border: 1px solid #e3e6ea;
+      border-radius: 10px;
+      color: #222;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.2;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .icone-alerta {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+    }
+
+    .loading {
+      margin: 12px 0;
+    }
+
+    .erro {
+      color: #b00020;
+      font-weight: bold;
+      margin: 12px 0;
+    }
 
     .info-teste {
-      margin: 0 0 12px 0; padding: 10px 12px; background: #eef6ff; border: 1px solid #b7d3f2;
-      border-radius: 10px; color: #154b82; font-size: 14px; text-align: center;
+      margin: 0 0 12px 0;
+      padding: 10px 12px;
+      background: #eef6ff;
+      border: 1px solid #b7d3f2;
+      border-radius: 10px;
+      color: #154b82;
+      font-size: 14px;
+      text-align: center;
     }
 
     .sinonimia-aviso {
-      display: none; margin: 0 0 12px 0; padding: 10px 12px; background: #fff7e6; border: 1px solid #f0d58a;
-      border-radius: 10px; color: #6b4e00; font-size: 14px; line-height: 1.35; text-align: center;
+      display: none;
+      margin: 0 0 12px 0;
+      padding: 10px 12px;
+      background: #fff7e6;
+      border: 1px solid #f0d58a;
+      border-radius: 10px;
+      color: #6b4e00;
+      font-size: 14px;
+      line-height: 1.35;
+      text-align: center;
     }
 
     .barra-busca {
-      display: flex; justify-content: flex-end; align-items: center; gap: 10px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
       margin: 8px 0 14px 0;
     }
 
@@ -69,10 +128,25 @@
       max-width: 100%;
     }
 
-    table.dataTable thead th { white-space: nowrap; }
-    #tabela td.col-medicamento, #tabela td.col-termo { font-weight: 600; }
-    #tabela td.col-potencias { white-space: pre-wrap; font-variant-numeric: tabular-nums; }
-    .rodape { margin-top: 14px; font-size: 12px; color: #666; }
+    table.dataTable thead th {
+      white-space: nowrap;
+    }
+
+    #tabela td.col-medicamento,
+    #tabela td.col-termo {
+      font-weight: 600;
+    }
+
+    #tabela td.col-potencias {
+      white-space: pre-wrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .rodape {
+      margin-top: 14px;
+      font-size: 12px;
+      color: #666;
+    }
 
     @media (max-width: 640px) {
       .barra-busca {
@@ -80,13 +154,13 @@
         flex-direction: column;
         align-items: stretch;
       }
+
       .barra-busca input {
         width: 100%;
       }
     }
   </style>
 </head>
-
 <body>
   <h1>Catálogo de Homeopatia - Teste de Sinonimias</h1>
 
@@ -128,10 +202,8 @@
     const ARQUIVO_CSV = "dados.csv";
     const ARQUIVO_SINONIMIAS = "sinonimias_site_busca.csv";
     const DELIMITADOR = ";";
-
     const CABECALHO_NORMAL = ["Medicamento", "Escala", "Potencias disponiveis"];
     const CABECALHO_SINONIMIA = ["Sinonimia", "Escalas e potencias"];
-
     const GITHUB_USER = "NovaEraHomeopatia";
     const GITHUB_REPO = "Medicamentos_Homeopaticos";
     const GITHUB_BRANCH = "main";
@@ -152,14 +224,27 @@
     function normalizarPotencias(txt) {
       const s = (txt ?? "").toString().trim();
       if (!s) return "";
-      return s.replace(/\s+/g, "   ");
+      return s.replace(/\s+/g, " ");
     }
 
     function formatarDataHoraBR(d) {
-      const optsData = { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", year: "numeric" };
-      const optsHora = { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit", hour12: false };
+      const optsData = {
+        timeZone: "America/Sao_Paulo",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+      };
+
+      const optsHora = {
+        timeZone: "America/Sao_Paulo",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      };
+
       const data = new Intl.DateTimeFormat("pt-BR", optsData).format(d);
       const hora = new Intl.DateTimeFormat("pt-BR", optsHora).format(d);
+
       return `${data} às ${hora}`;
     }
 
@@ -167,13 +252,22 @@
       const el = document.getElementById("dataAtualizacao");
       if (!el) return;
 
-      const rawUrl = `https://raw.githubusercontent.com/${encodeURIComponent(GITHUB_USER)}/${encodeURIComponent(GITHUB_REPO)}/${encodeURIComponent(GITHUB_BRANCH)}/${encodeURIComponent(ARQUIVO_CSV)}?v=${Date.now()}`;
-
       try {
-        const resp = await fetch(rawUrl, { method: "HEAD", cache: "no-store" });
-        const lm = resp.headers.get("Last-Modified");
-        if (lm) {
-          el.textContent = formatarDataHoraBR(new Date(lm));
+        const apiUrl =
+          `https://api.github.com/repos/${encodeURIComponent(GITHUB_USER)}/${encodeURIComponent(GITHUB_REPO)}/commits?path=${encodeURIComponent(ARQUIVO_CSV)}&sha=${encodeURIComponent(GITHUB_BRANCH)}&per_page=1`;
+
+        const resp = await fetch(apiUrl, { cache: "no-store" });
+        const data = await resp.json();
+
+        const iso =
+          data &&
+          data[0] &&
+          data[0].commit &&
+          data[0].commit.committer &&
+          data[0].commit.committer.date;
+
+        if (iso) {
+          el.textContent = formatarDataHoraBR(new Date(iso));
           return;
         }
       } catch (e) {}
@@ -199,6 +293,7 @@
       if ($.fn.DataTable.isDataTable("#tabela")) {
         $("#tabela").DataTable().destroy();
       }
+
       document.querySelector("#tabela thead").innerHTML = "";
       document.querySelector("#tabela tbody").innerHTML = "";
     }
@@ -218,6 +313,7 @@
       thead.appendChild(trHead);
 
       const tbody = document.querySelector("#tabela tbody");
+
       linhas.forEach(linha => {
         const tr = document.createElement("tr");
 
@@ -227,6 +323,7 @@
 
           if (tipo === "normal") {
             if (idx === 0) td.classList.add("col-medicamento");
+
             if (idx === 2) {
               td.classList.add("col-potencias");
               td.textContent = normalizarPotencias(valor);
@@ -273,96 +370,20 @@
 
     function parseCsvRows(rows) {
       const out = [];
+
       for (const row of rows) {
         if (!row || !row.length) continue;
+
         const vals = row.map(v => String(v ?? ""));
         if (vals.every(v => v.trim() === "")) continue;
+
         out.push(vals);
       }
+
       return out;
     }
 
-    function carregarArquivos() {
-      Papa.parse(ARQUIVO_CSV, {
-        download: true,
-        header: false,
-        delimiter: DELIMITADOR,
-        skipEmptyLines: true,
-        encoding: "UTF-8",
-        complete: function (results) {
-          const rows = parseCsvRows(results.data || []);
-          let corpo = rows;
-
-          if (rows.length && rows[0].length >= 3) {
-            const h0 = normalizarBusca(rows[0][0]);
-            const h1 = normalizarBusca(rows[0][1]);
-            if (h0 === "MEDICAMENTO" && h1 === "ESCALA") {
-              corpo = rows.slice(1);
-            }
-          }
-
-          dadosCatalogo = corpo.map(r => ({
-            medicamento: String(r[0] ?? "").trim(),
-            escala: String(r[1] ?? "").trim(),
-            potencias: String(r[2] ?? "").trim(),
-            medicamentoNorm: normalizarBusca(r[0] ?? "")
-          }));
-
-          Papa.parse(ARQUIVO_SINONIMIAS, {
-            download: true,
-            header: true,
-            delimiter: ",",
-            skipEmptyLines: true,
-            encoding: "UTF-8",
-            complete: function (synRes) {
-              sinonimiasBusca = (synRes.data || []).map(r => ({
-                sinonimia: String(r.SINONIMIA ?? "").trim(),
-                medicamento: String(r.MEDICAMENTO ?? "").trim(),
-                sinonimiaNorm: normalizarBusca(r.SINONIMIA ?? ""),
-                medicamentoNorm: normalizarBusca(r.MEDICAMENTO ?? "")
-              })).filter(x => x.sinonimiaNorm && x.medicamentoNorm);
-
-              aplicarBusca(document.getElementById("buscaExterna").value || "");
-              document.getElementById("status").textContent = "";
-            },
-            error: function () {
-              document.getElementById("status").className = "erro";
-              document.getElementById("status").textContent = "Erro ao carregar o arquivo de sinonimias.";
-            }
-          });
-        },
-        error: function () {
-          document.getElementById("status").className = "erro";
-          document.getElementById("status").textContent = "Erro ao carregar o arquivo do catalogo.";
-        }
-      });
-    }
-
-    function aplicarBusca(texto) {
-      const termo = String(texto || "").trim();
-      const termoNorm = normalizarBusca(termo);
-      limparAvisoSinonimia();
-
-      if (!termoNorm) {
-        montarTabela(CABECALHO_NORMAL, [], "normal");
-        return;
-      }
-
-      const diretos = dadosCatalogo
-        .filter(r => r.medicamentoNorm.startsWith(termoNorm))
-        .map(r => [r.medicamento, r.escala, r.potencias]);
-
-      if (diretos.length > 0) {
-        montarTabela(CABECALHO_NORMAL, diretos, "normal");
-        return;
-      }
-
-      const sinonimiasEncontradas = sinonimiasBusca.filter(s => s.sinonimiaNorm.startsWith(termoNorm));
-      if (sinonimiasEncontradas.length === 0) {
-        montarTabela(CABECALHO_NORMAL, [], "normal");
-        return;
-      }
-
+    function montarLinhasSinonimia(sinonimiasEncontradas) {
       const grupos = new Map();
 
       for (const s of sinonimiasEncontradas) {
@@ -389,16 +410,120 @@
         });
 
         if (pares.length > 0) {
-          linhasSinonimia.push([g.sinonimia, pares.join("   ")]);
+          linhasSinonimia.push([g.sinonimia, pares.join(" ")]);
         }
       }
 
-      if (linhasSinonimia.length > 0) {
-        mostrarAvisoSinonimia(termo);
-        montarTabela(CABECALHO_SINONIMIA, linhasSinonimia, "sinonimia");
-      } else {
+      return linhasSinonimia;
+    }
+
+    function carregarArquivos() {
+      Papa.parse(ARQUIVO_CSV, {
+        download: true,
+        header: false,
+        delimiter: DELIMITADOR,
+        skipEmptyLines: true,
+        encoding: "UTF-8",
+        complete: function (results) {
+          const rows = parseCsvRows(results.data || []);
+          let corpo = rows;
+
+          if (rows.length && rows[0].length >= 3) {
+            const h0 = normalizarBusca(rows[0][0]);
+            const h1 = normalizarBusca(rows[0][1]);
+
+            if (h0 === "MEDICAMENTO" && h1 === "ESCALA") {
+              corpo = rows.slice(1);
+            }
+          }
+
+          dadosCatalogo = corpo.map(r => ({
+            medicamento: String(r[0] ?? "").trim(),
+            escala: String(r[1] ?? "").trim(),
+            potencias: String(r[2] ?? "").trim(),
+            medicamentoNorm: normalizarBusca(r[0] ?? "")
+          }));
+
+          Papa.parse(ARQUIVO_SINONIMIAS, {
+            download: true,
+            header: true,
+            delimiter: ",",
+            skipEmptyLines: true,
+            encoding: "UTF-8",
+            complete: function (synRes) {
+              sinonimiasBusca = (synRes.data || [])
+                .map(r => ({
+                  sinonimia: String(r.SINONIMIA ?? "").trim(),
+                  medicamento: String(r.MEDICAMENTO ?? "").trim(),
+                  sinonimiaNorm: normalizarBusca(r.SINONIMIA ?? ""),
+                  medicamentoNorm: normalizarBusca(r.MEDICAMENTO ?? "")
+                }))
+                .filter(x => x.sinonimiaNorm && x.medicamentoNorm);
+
+              aplicarBusca(document.getElementById("buscaExterna").value || "");
+              document.getElementById("status").textContent = "";
+            },
+            error: function () {
+              document.getElementById("status").className = "erro";
+              document.getElementById("status").textContent = "Erro ao carregar o arquivo de sinonimias.";
+            }
+          });
+        },
+        error: function () {
+          document.getElementById("status").className = "erro";
+          document.getElementById("status").textContent = "Erro ao carregar o arquivo do catalogo.";
+        }
+      });
+    }
+
+    function aplicarBusca(texto) {
+      const termo = String(texto || "").trim();
+      const termoNorm = normalizarBusca(termo);
+
+      limparAvisoSinonimia();
+
+      if (!termoNorm) {
         montarTabela(CABECALHO_NORMAL, [], "normal");
+        return;
       }
+
+      // 1) sinonimia exata tem prioridade
+      let sinonimiasEncontradas = sinonimiasBusca.filter(s => s.sinonimiaNorm === termoNorm);
+
+      if (sinonimiasEncontradas.length > 0) {
+        const linhasSinonimia = montarLinhasSinonimia(sinonimiasEncontradas);
+
+        if (linhasSinonimia.length > 0) {
+          mostrarAvisoSinonimia(termo);
+          montarTabela(CABECALHO_SINONIMIA, linhasSinonimia, "sinonimia");
+          return;
+        }
+      }
+
+      // 2) busca direta normal no catalogo
+      const diretos = dadosCatalogo
+        .filter(r => r.medicamentoNorm.startsWith(termoNorm))
+        .map(r => [r.medicamento, r.escala, r.potencias]);
+
+      if (diretos.length > 0) {
+        montarTabela(CABECALHO_NORMAL, diretos, "normal");
+        return;
+      }
+
+      // 3) se nao achou no catalogo, tenta sinonimia por inicio
+      sinonimiasEncontradas = sinonimiasBusca.filter(s => s.sinonimiaNorm.startsWith(termoNorm));
+
+      if (sinonimiasEncontradas.length > 0) {
+        const linhasSinonimia = montarLinhasSinonimia(sinonimiasEncontradas);
+
+        if (linhasSinonimia.length > 0) {
+          mostrarAvisoSinonimia(termo);
+          montarTabela(CABECALHO_SINONIMIA, linhasSinonimia, "sinonimia");
+          return;
+        }
+      }
+
+      montarTabela(CABECALHO_NORMAL, [], "normal");
     }
 
     document.getElementById("buscaExterna").addEventListener("input", function () {
