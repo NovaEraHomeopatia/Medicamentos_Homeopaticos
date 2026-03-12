@@ -11,9 +11,32 @@
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.4; }
-    h1 { margin: 0 0 4px 0; text-align: center; font-size: 34px; line-height: 1.15; }
-    @media (max-width: 480px) { h1 { font-size: 26px; } }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      line-height: 1.4;
+    }
+
+    .logo-topo {
+      text-align: center;
+      margin: 0 0 10px 0;
+    }
+
+    .logo-topo img {
+      max-width: 220px;
+      height: auto;
+    }
+
+    h1 {
+      margin: 0 0 4px 0;
+      text-align: center;
+      font-size: 34px;
+      line-height: 1.15;
+    }
+
+    @media (max-width: 480px) {
+      h1 { font-size: 26px; }
+    }
 
     .atualizado-linha {
       margin: 0 0 10px 0;
@@ -45,8 +68,15 @@
       flex: 0 0 auto;
     }
 
-    .loading { margin: 12px 0; }
-    .erro { color: #b00020; font-weight: bold; margin: 12px 0; }
+    .loading {
+      margin: 12px 0;
+    }
+
+    .erro {
+      color: #b00020;
+      font-weight: bold;
+      margin: 12px 0;
+    }
 
     .barra-busca {
       display: flex;
@@ -82,10 +112,24 @@
       max-width: 100%;
     }
 
-    table.dataTable thead th { white-space: nowrap; }
-    #tabela td.col-medicamento { font-weight: 600; }
-    #tabela td.col-potencias { white-space: pre-wrap; font-variant-numeric: tabular-nums; }
-    .rodape { margin-top: 14px; font-size: 12px; color: #666; }
+    table.dataTable thead th {
+      white-space: nowrap;
+    }
+
+    #tabela td.col-medicamento {
+      font-weight: 600;
+    }
+
+    #tabela td.col-potencias {
+      white-space: pre-wrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .rodape {
+      margin-top: 14px;
+      font-size: 12px;
+      color: #666;
+    }
 
     @media (max-width: 640px) {
       .barra-busca {
@@ -102,8 +146,12 @@
 </head>
 
 <body>
+  <div class="logo-topo">
+    <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+  </div>
+
   <h1>Catálogo de Homeopatia</h1>
-<div style="text-align:center;font-size:12px;color:#999;margin-bottom:8px;">VERSAO SINO V7</div>
+
   <div class="atualizado-linha">
     <span>Atualizado em </span><span id="dataAtualizacao">carregando...</span>
   </div>
@@ -362,7 +410,6 @@
       const resultados = [];
       const chaves = new Set();
 
-      // 1) Catalogo de medicamentos
       dadosCatalogo.forEach(r => {
         if (r.medicamentoNorm.startsWith(termoNorm)) {
           const chave = [
@@ -378,7 +425,6 @@
         }
       });
 
-      // 2) Sinonimias, sempre tambem
       sinonimiasBusca.forEach(s => {
         if (s.sinonimiaNorm.startsWith(termoNorm)) {
           dadosCatalogo.forEach(r => {
