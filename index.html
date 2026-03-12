@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Catálogo de Homeopatia - Teste de Sinonimias</title>
+  <title>Catálogo de Homeopatia</title>
 
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -15,64 +15,97 @@
     h1 { margin: 0 0 4px 0; text-align: center; font-size: 34px; line-height: 1.15; }
     @media (max-width: 480px) { h1 { font-size: 26px; } }
 
-    .atualizado-linha { margin: 0 0 10px 0; font-size: 14px; color: #555; text-align: center; }
-    .topo-destaque {
-      margin: 0 0 12px 0; padding: 10px 12px; background: #f6f7f9; border: 1px solid #e3e6ea;
-      border-radius: 10px; color: #222; font-size: 14px; font-weight: 600; line-height: 1.2;
-      display: flex; gap: 10px; align-items: center; justify-content: center; text-align: center;
+    .atualizado-linha {
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      color: #555;
+      text-align: center;
     }
-    .icone-alerta { width: 18px; height: 18px; flex: 0 0 auto; }
+
+    .topo-destaque {
+      margin: 0 0 12px 0;
+      padding: 10px 12px;
+      background: #f6f7f9;
+      border: 1px solid #e3e6ea;
+      border-radius: 10px;
+      color: #222;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.2;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .icone-alerta {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+    }
+
     .loading { margin: 12px 0; }
     .erro { color: #b00020; font-weight: bold; margin: 12px 0; }
 
-    .info-teste {
-      margin: 0 0 12px 0; padding: 10px 12px; background: #eef6ff; border: 1px solid #b7d3f2;
-      border-radius: 10px; color: #154b82; font-size: 14px; text-align: center;
-    }
-
-    .sinonimia-aviso {
-      display: none; margin: 0 0 12px 0; padding: 10px 12px; background: #fff7e6; border: 1px solid #f0d58a;
-      border-radius: 10px; color: #6b4e00; font-size: 14px; line-height: 1.35; text-align: center;
-    }
-
     .barra-busca {
-      display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin: 8px 0 14px 0;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+      margin: 8px 0 14px 0;
     }
 
     .barra-busca label {
-      font-weight: 800; text-transform: uppercase; display: inline-flex; align-items: center; gap: 6px; font-size: 18px;
+      font-weight: 800;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 18px;
     }
 
     .barra-busca label::before {
-      content: ""; display: inline-block; width: 18px; height: 18px; background-repeat: no-repeat; background-size: 18px 18px;
+      content: "";
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      background-repeat: no-repeat;
+      background-size: 18px 18px;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='7' fill='none' stroke='%23333' stroke-width='2'/%3E%3Cline x1='16.65' y1='16.65' x2='22' y2='22' stroke='%23333' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
     }
 
     .barra-busca input {
-      padding: 6px 8px; font-size: 14px; width: 280px; max-width: 100%;
+      padding: 6px 8px;
+      font-size: 14px;
+      width: 280px;
+      max-width: 100%;
     }
 
     table.dataTable thead th { white-space: nowrap; }
-    #tabela td.col-medicamento, #tabela td.col-termo { font-weight: 600; }
+    #tabela td.col-medicamento { font-weight: 600; }
     #tabela td.col-potencias { white-space: pre-wrap; font-variant-numeric: tabular-nums; }
     .rodape { margin-top: 14px; font-size: 12px; color: #666; }
 
     @media (max-width: 640px) {
-      .barra-busca { justify-content: stretch; flex-direction: column; align-items: stretch; }
-      .barra-busca input { width: 100%; }
+      .barra-busca {
+        justify-content: stretch;
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .barra-busca input {
+        width: 100%;
+      }
     }
   </style>
 </head>
 
 <body>
-  <h1>Catálogo de Homeopatia - Teste de Sinonimias</h1>
-
+  <h1>Catálogo de Homeopatia</h1>
+<div style="text-align:center;font-size:12px;color:#999;margin-bottom:8px;">VERSAO SINO V7</div>
   <div class="atualizado-linha">
     <span>Atualizado em </span><span id="dataAtualizacao">carregando...</span>
-  </div>
-
-  <div class="info-teste">
-    Pagina de teste em paralelo. Nao substitui o catalogo oficial.
   </div>
 
   <div class="topo-destaque">
@@ -84,7 +117,6 @@
     <div>Digite o medicamento no campo <b>BUSCAR</b> abaixo.</div>
   </div>
 
-  <div id="avisoSinonimia" class="sinonimia-aviso"></div>
   <div id="status" class="loading">Carregando dados...</div>
 
   <div class="barra-busca">
@@ -98,7 +130,7 @@
   </table>
 
   <div class="rodape">
-    Teste de busca por sinonimias com nome principal oculto.
+    Catálogo de medicamentos homeopáticos.
   </div>
 
   <script>
@@ -106,8 +138,7 @@
     const ARQUIVO_SINONIMIAS = "sinonimias_site_busca.csv";
     const DELIMITADOR = ";";
 
-    const CABECALHO_NORMAL = ["Medicamento", "Escala", "Potencias disponiveis"];
-    const CABECALHO_SINONIMIA = ["Sinonimia", "Escala", "Potencias disponiveis"];
+    const CABECALHO = ["Medicamento", "Escala", "Potencias disponiveis"];
 
     const GITHUB_USER = "NovaEraHomeopatia";
     const GITHUB_REPO = "Medicamentos_Homeopaticos";
@@ -132,8 +163,19 @@
     }
 
     function formatarDataHoraBR(d) {
-      const optsData = { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", year: "numeric" };
-      const optsHora = { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit", hour12: false };
+      const optsData = {
+        timeZone: "America/Sao_Paulo",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+      };
+      const optsHora = {
+        timeZone: "America/Sao_Paulo",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      };
+
       const data = new Intl.DateTimeFormat("pt-BR", optsData).format(d);
       const hora = new Intl.DateTimeFormat("pt-BR", optsHora).format(d);
       return `${data} às ${hora}`;
@@ -147,7 +189,14 @@
         const apiUrl = `https://api.github.com/repos/${encodeURIComponent(GITHUB_USER)}/${encodeURIComponent(GITHUB_REPO)}/commits?path=${encodeURIComponent(ARQUIVO_CSV)}&sha=${encodeURIComponent(GITHUB_BRANCH)}&per_page=1`;
         const resp = await fetch(apiUrl, { cache: "no-store" });
         const data = await resp.json();
-        const iso = data && data[0] && data[0].commit && data[0].commit.committer && data[0].commit.committer.date;
+
+        const iso =
+          data &&
+          data[0] &&
+          data[0].commit &&
+          data[0].commit.committer &&
+          data[0].commit.committer.date;
+
         if (iso) {
           el.textContent = formatarDataHoraBR(new Date(iso));
           return;
@@ -155,20 +204,6 @@
       } catch (e) {}
 
       el.textContent = "indisponivel";
-    }
-
-    function limparAvisoSinonimia() {
-      const el = document.getElementById("avisoSinonimia");
-      if (!el) return;
-      el.style.display = "none";
-      el.textContent = "";
-    }
-
-    function mostrarAvisoSinonimia(termo) {
-      const el = document.getElementById("avisoSinonimia");
-      if (!el) return;
-      el.textContent = `Busca realizada por sinonimia: "${termo}".`;
-      el.style.display = "block";
     }
 
     function destruirTabelaSeExistir() {
@@ -179,43 +214,41 @@
       document.querySelector("#tabela tbody").innerHTML = "";
     }
 
-    function montarTabela(cabecalho, linhas, tipo) {
+    function montarTabela(linhas) {
       destruirTabelaSeExistir();
 
       const thead = document.querySelector("#tabela thead");
       const trHead = document.createElement("tr");
-      cabecalho.forEach(col => {
+
+      CABECALHO.forEach(col => {
         const th = document.createElement("th");
-        th.textContent = col || "";
+        th.textContent = col;
         trHead.appendChild(th);
       });
+
       thead.appendChild(trHead);
 
       const tbody = document.querySelector("#tabela tbody");
+
       linhas.forEach(linha => {
         const tr = document.createElement("tr");
+
         linha.forEach((cel, idx) => {
           const td = document.createElement("td");
           const valor = String(cel ?? "");
-          if (tipo === "normal") {
-            if (idx === 0) td.classList.add("col-medicamento");
-            if (idx === 2) {
-              td.classList.add("col-potencias");
-              td.textContent = normalizarPotencias(valor);
-            } else {
-              td.textContent = valor;
-            }
+
+          if (idx === 0) td.classList.add("col-medicamento");
+
+          if (idx === 2) {
+            td.classList.add("col-potencias");
+            td.textContent = normalizarPotencias(valor);
           } else {
-            if (idx === 0) td.classList.add("col-termo");
-            if (idx === 2) {
-              td.classList.add("col-potencias");
-              td.textContent = normalizarPotencias(valor);
-            } else {
-              td.textContent = valor;
-            }
+            td.textContent = valor;
           }
+
           tr.appendChild(td);
         });
+
         tbody.appendChild(tr);
       });
 
@@ -247,38 +280,17 @@
 
     function parseCsvRows(rows) {
       const out = [];
+
       for (const row of rows) {
         if (!row || !row.length) continue;
+
         const vals = row.map(v => String(v ?? ""));
         if (vals.every(v => v.trim() === "")) continue;
+
         out.push(vals);
       }
+
       return out;
-    }
-
-    function montarLinhasSinonimiaDetalhadas(sinonimiasEncontradas) {
-      const grupos = new Map();
-
-      for (const s of sinonimiasEncontradas) {
-        if (!grupos.has(s.sinonimiaNorm)) {
-          grupos.set(s.sinonimiaNorm, {
-            sinonimia: s.sinonimia,
-            medicamentosNorm: new Set([s.medicamentoNorm])
-          });
-        } else {
-          grupos.get(s.sinonimiaNorm).medicamentosNorm.add(s.medicamentoNorm);
-        }
-      }
-
-      const linhas = [];
-      for (const g of grupos.values()) {
-        for (const r of dadosCatalogo) {
-          if (g.medicamentosNorm.has(r.medicamentoNorm)) {
-            linhas.push([g.sinonimia, r.escala, r.potencias]);
-          }
-        }
-      }
-      return linhas;
     }
 
     function carregarArquivos() {
@@ -295,6 +307,7 @@
           if (rows.length && rows[0].length >= 3) {
             const h0 = normalizarBusca(rows[0][0]);
             const h1 = normalizarBusca(rows[0][1]);
+
             if (h0 === "MEDICAMENTO" && h1 === "ESCALA") {
               corpo = rows.slice(1);
             }
@@ -340,43 +353,52 @@
     function aplicarBusca(texto) {
       const termo = String(texto || "").trim();
       const termoNorm = normalizarBusca(termo);
-      limparAvisoSinonimia();
 
       if (!termoNorm) {
-        montarTabela(CABECALHO_NORMAL, [], "normal");
+        montarTabela([]);
         return;
       }
 
-      let sinonimiasEncontradas = sinonimiasBusca.filter(s => s.sinonimiaNorm === termoNorm);
-      if (sinonimiasEncontradas.length > 0) {
-        const linhasSinonimia = montarLinhasSinonimiaDetalhadas(sinonimiasEncontradas);
-        if (linhasSinonimia.length > 0) {
-          mostrarAvisoSinonimia(termo);
-          montarTabela(CABECALHO_SINONIMIA, linhasSinonimia, "sinonimia");
-          return;
+      const resultados = [];
+      const chaves = new Set();
+
+      // 1) Catalogo de medicamentos
+      dadosCatalogo.forEach(r => {
+        if (r.medicamentoNorm.startsWith(termoNorm)) {
+          const chave = [
+            normalizarBusca(r.medicamento),
+            normalizarBusca(r.escala),
+            normalizarBusca(r.potencias)
+          ].join("||");
+
+          if (!chaves.has(chave)) {
+            chaves.add(chave);
+            resultados.push([r.medicamento, r.escala, r.potencias]);
+          }
         }
-      }
+      });
 
-      const diretos = dadosCatalogo
-        .filter(r => r.medicamentoNorm.startsWith(termoNorm))
-        .map(r => [r.medicamento, r.escala, r.potencias]);
+      // 2) Sinonimias, sempre tambem
+      sinonimiasBusca.forEach(s => {
+        if (s.sinonimiaNorm.startsWith(termoNorm)) {
+          dadosCatalogo.forEach(r => {
+            if (r.medicamentoNorm === s.medicamentoNorm) {
+              const chave = [
+                normalizarBusca(s.sinonimia),
+                normalizarBusca(r.escala),
+                normalizarBusca(r.potencias)
+              ].join("||");
 
-      if (diretos.length > 0) {
-        montarTabela(CABECALHO_NORMAL, diretos, "normal");
-        return;
-      }
-
-      sinonimiasEncontradas = sinonimiasBusca.filter(s => s.sinonimiaNorm.startsWith(termoNorm));
-      if (sinonimiasEncontradas.length > 0) {
-        const linhasSinonimia = montarLinhasSinonimiaDetalhadas(sinonimiasEncontradas);
-        if (linhasSinonimia.length > 0) {
-          mostrarAvisoSinonimia(termo);
-          montarTabela(CABECALHO_SINONIMIA, linhasSinonimia, "sinonimia");
-          return;
+              if (!chaves.has(chave)) {
+                chaves.add(chave);
+                resultados.push([s.sinonimia, r.escala, r.potencias]);
+              }
+            }
+          });
         }
-      }
+      });
 
-      montarTabela(CABECALHO_NORMAL, [], "normal");
+      montarTabela(resultados);
     }
 
     document.getElementById("buscaExterna").addEventListener("input", function () {
