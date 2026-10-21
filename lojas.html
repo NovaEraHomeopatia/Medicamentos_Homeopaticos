@@ -220,20 +220,20 @@
       if (!el) return;
 
       try {
-        const apiUrl = `https://api.github.com/repos/${encodeURIComponent(GITHUB_USER)}/${encodeURIComponent(GITHUB_REPO)}/commits?path=${encodeURIComponent(ARQUIVO_CSV)}&sha=${encodeURIComponent(GITHUB_BRANCH)}&per_page=1`;
-        const resp = await fetch(apiUrl, { cache: "no-store" });
-        const data = await resp.json();
+        const url = `${ARQUIVO_CSV}?_ts=${Date.now()}`;
+        const resp = await fetch(url, {
+          method: "HEAD",
+          cache: "no-store"
+        });
 
-        const iso =
-          data &&
-          data[0] &&
-          data[0].commit &&
-          data[0].commit.committer &&
-          data[0].commit.committer.date;
+        const ultimaModificacao = resp.headers.get("Last-Modified");
 
-        if (iso) {
-          el.textContent = formatarDataHoraBR(new Date(iso));
-          return;
+        if (ultimaModificacao) {
+          const d = new Date(ultimaModificacao);
+          if (!Number.isNaN(d.getTime())) {
+            el.textContent = formatarDataHoraBR(d);
+            return;
+          }
         }
       } catch (e) {}
 
