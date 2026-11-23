@@ -184,6 +184,7 @@
   <script>
     const ARQUIVO_CSV = "dados.csv";
     const ARQUIVO_SINONIMIAS = "sinonimias_site_busca.csv";
+    const ARQUIVO_ATUALIZACAO = "ultima_atualizacao.txt";
     const DELIMITADOR = ";";
 
     const CABECALHO = ["Medicamento", "Escala", "Potencias disponiveis"];
@@ -234,20 +235,17 @@
       if (!el) return;
 
       try {
-        const url = `${ARQUIVO_CSV}?_ts=${Date.now()}`;
-        const resp = await fetch(url, {
-          method: "HEAD",
-          cache: "no-store"
-        });
+        const url = `${ARQUIVO_ATUALIZACAO}?_ts=${Date.now()}`;
+        const resp = await fetch(url, { cache: "no-store" });
 
-        const ultimaModificacao = resp.headers.get("Last-Modified");
+        if (!resp.ok) throw new Error("Marcador de atualizacao indisponivel");
 
-        if (ultimaModificacao) {
-          const d = new Date(ultimaModificacao);
-          if (!Number.isNaN(d.getTime())) {
-            el.textContent = formatarDataHoraBR(d);
-            return;
-          }
+        const iso = (await resp.text()).trim();
+        const d = new Date(iso);
+
+        if (!Number.isNaN(d.getTime())) {
+          el.textContent = formatarDataHoraBR(d);
+          return;
         }
       } catch (e) {}
 
